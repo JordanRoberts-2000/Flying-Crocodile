@@ -36,6 +36,20 @@ const AppSidebar = ({}) => {
 
   return (
     <SheetContent side={"left"} className="flex flex-col p-0 gap-0">
+      <button
+        className="bg-yellow-400 p-2"
+        onClick={async () => {
+          const res = await fetch("/api/items/galleries");
+          if (res.ok) {
+            const data = await res.json();
+            console.log(data);
+          } else {
+            console.log("request failed");
+          }
+        }}
+      >
+        Fetch
+      </button>
       <div className="flex gap-4 items-center p-2 bg-neutral-100">
         <div className="bg-green-50 p-1 rounded-md shadow">
           <UserIcon className="size-6 text-green-700" />

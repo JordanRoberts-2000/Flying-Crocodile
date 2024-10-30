@@ -51,7 +51,7 @@ const GalleryInput = ({ addFolder, setGalleryItems, setAddFolder }: Props) => {
       )}
 
       <input
-        className="w-full p-2 pl-14"
+        className="w-full p-2 pl-14 font-semibold"
         placeholder={addFolder === "folder" ? "Folder name" : "Gallery name"}
         ref={inputRef}
         autoFocus
