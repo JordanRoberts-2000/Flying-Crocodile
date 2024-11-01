@@ -14,8 +14,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  query GetEntries {\n    getEntries {\n      id\n      title\n      parentid\n    }\n  }\n": types.GetEntriesDocument,
-    "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      id\n      title\n      parentid\n    }\n  }\n": types.CreateEntryDocument,
+    "\n  query GetEntries {\n    getEntries {\n      id\n      title\n      isFolder\n    }\n  }\n": types.GetEntriesDocument,
+    "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      parentId\n      title\n      isFolder\n    }\n  }\n": types.CreateEntryDocument,
 };
 
 /**
@@ -35,11 +35,11 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetEntries {\n    getEntries {\n      id\n      title\n      parentid\n    }\n  }\n"): (typeof documents)["\n  query GetEntries {\n    getEntries {\n      id\n      title\n      parentid\n    }\n  }\n"];
+export function graphql(source: "\n  query GetEntries {\n    getEntries {\n      id\n      title\n      isFolder\n    }\n  }\n"): (typeof documents)["\n  query GetEntries {\n    getEntries {\n      id\n      title\n      isFolder\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      id\n      title\n      parentid\n    }\n  }\n"): (typeof documents)["\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      id\n      title\n      parentid\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      parentId\n      title\n      isFolder\n    }\n  }\n"): (typeof documents)["\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      parentId\n      title\n      isFolder\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
