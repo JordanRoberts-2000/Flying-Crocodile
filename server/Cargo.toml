@@ -11,3 +11,4 @@ diesel = { version = "2.2.0", features = ["postgres", "r2d2"] }
 dotenv = "0.15.0"
 async-graphql = "7.0.11"
 async-graphql-actix-web = "7.0.11"
+actix-cors = "0.7.0"
