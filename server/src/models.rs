@@ -8,12 +8,14 @@ use crate::schema::entries;
 pub struct Entry {
     pub id: i32,
     pub title: String,
-    pub parentid: Option<i32>,
+    pub parent_id: Option<i32>,
+    pub is_folder: bool,
 }
 
 #[derive(Deserialize, Insertable, InputObject)]
 #[table_name = "entries"]
 pub struct NewEntry {
     pub title: String,
-    pub parentid: Option<i32>,
+    pub parent_id: Option<i32>,
+    pub is_folder: bool,
 }

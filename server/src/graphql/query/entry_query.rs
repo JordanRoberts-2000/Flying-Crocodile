@@ -1,6 +1,6 @@
 use crate::db::Db;
 use crate::models::Entry;
-use crate::schema::entries::dsl::entries; // Explicitly import the entries table
+use crate::schema::entries::dsl::entries;
 use actix_web::web;
 use async_graphql::{Context, Object, Result};
 use diesel::prelude::*;

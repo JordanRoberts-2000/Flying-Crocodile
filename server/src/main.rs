@@ -4,15 +4,18 @@ use async_graphql::http::GraphiQLSource;
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use db::get_connection_pool;
 use graphql::schema::{create_schema, AppSchema};
+use utils::initialize_root_folders;
 
 mod db;
 mod graphql;
 mod models;
 mod schema;
+mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let db = get_connection_pool();
+    initialize_root_folders(&db.clone());
     let schema = web::Data::new(create_schema(db));
     println!("Server running");
     HttpServer::new(move || {
