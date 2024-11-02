@@ -6,14 +6,16 @@ import EntryInput from "./EntryInput";
 import EntryFolder from "./EntryFolder";
 import EntryLink from "./EntryLink";
 import { Separator } from "@/components/ui/separator";
+import useInputIdMatch from "../hooks/useInputIdMatch";
 
 const TEMP_ROOT_ID = 1;
 
 const Entries = ({}) => {
-  const entryInputMode = useEntryStore((state) => state.entryInputMode);
+  const isMatchingId = useInputIdMatch(TEMP_ROOT_ID, "add");
   const editMode = useEntryStore((state) => state.editMode);
   const { data: entries, isLoading, isSuccess } = useGetEntries();
   const [popoverOpen, setPopoverOpen] = useState(false);
+
   if (isLoading || !isSuccess) return;
   return (
     <div className="px-2 flex-1 flex flex-col">
@@ -29,13 +31,7 @@ const Entries = ({}) => {
         </AddEntityPopover>
       )}
       <ul className="flex flex-col flex-1 pt-4 gap-0.5">
-        {entryInputMode.id === TEMP_ROOT_ID &&
-          entryInputMode.mode === "add" && (
-            <EntryInput
-              entryId={TEMP_ROOT_ID}
-              entryInputMode={entryInputMode}
-            />
-          )}
+        {isMatchingId && <EntryInput entryId={TEMP_ROOT_ID} />}
         {entries.map((entry) =>
           entry.isFolder ? (
             <EntryFolder

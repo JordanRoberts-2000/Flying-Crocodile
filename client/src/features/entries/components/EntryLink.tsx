@@ -4,6 +4,7 @@ import BinIcon from "../../../assets/svgs/bin.svg?react";
 import useEntryStore from "../store";
 import EntryInput from "./EntryInput";
 import AreYouSureDialog from "./areYouSureDialog";
+import useInputIdMatch from "../hooks/useInputIdMatch";
 
 type Props = {
   id: number;
@@ -13,8 +14,8 @@ type Props = {
 
 const EntryLink = ({ id, title, embedLevel }: Props) => {
   const editMode = useEntryStore((state) => state.editMode);
-  const entryInputMode = useEntryStore((state) => state.entryInputMode);
-  const setInputMode = useEntryStore((state) => state.setInputMode);
+  const isMatchingId = useInputIdMatch(id, "edit");
+  const setInputMode = useEntryStore((state) => state.actions.setInputMode);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -32,12 +33,8 @@ const EntryLink = ({ id, title, embedLevel }: Props) => {
           embedLevel >= 2 ? "size-5" : "size-6 min-h-6 min-w-6"
         }`}
       />
-      {entryInputMode.id === id && entryInputMode.mode === "edit" ? (
-        <EntryInput
-          entryInputMode={entryInputMode}
-          entryId={id}
-          defaultValue={title}
-        />
+      {isMatchingId ? (
+        <EntryInput entryId={id} defaultValue={title} />
       ) : (
         <p
           className={`${

@@ -3,17 +3,17 @@ import FolderIcon from "../../../assets/svgs/folderPlus.svg?react";
 import ImageIcon from "../../../assets/svgs/photo.svg?react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useEntryStore from "../store";
-import { InputMode } from "../entryTypes";
 
 type Props = {
   entryId: number;
-  entryInputMode: InputMode;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
-const EntryInput = ({ entryId, entryInputMode, ...rest }: Props) => {
-  const clearInputMode = useEntryStore((state) => state.clearInputMode);
+const EntryInput = ({ entryId, ...rest }: Props) => {
+  const clearInputMode = useEntryStore((state) => state.actions.clearInputMode);
+  const entryInputMode = useEntryStore((state) => state.entryInputMode);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const mutation = useCreateEntry();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (entryInputMode.mode === "add") {

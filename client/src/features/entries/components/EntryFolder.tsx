@@ -8,6 +8,7 @@ import AddEntityPopover from "./AddEntityPopover";
 import useEntryStore from "../store";
 import EntryInput from "./EntryInput";
 import AreYouSureDialog from "./areYouSureDialog";
+import useInputIdMatch from "../hooks/useInputIdMatch";
 
 type Props = {
   id: number;
@@ -19,8 +20,8 @@ const EntryFolder = ({ id, title, embedLevel }: Props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
   const editMode = useEntryStore((state) => state.editMode);
-  const entryInputMode = useEntryStore((state) => state.entryInputMode);
-  const setInputMode = useEntryStore((state) => state.setInputMode);
+  const isMatchingId = useInputIdMatch(id, "edit");
+  const setInputMode = useEntryStore((state) => state.actions.setInputMode);
 
   // Get embedded entries for this folder id
 
@@ -67,12 +68,8 @@ const EntryFolder = ({ id, title, embedLevel }: Props) => {
             }`}
           />
         )}
-        {entryInputMode.id === id && entryInputMode.mode === "edit" ? (
-          <EntryInput
-            entryInputMode={entryInputMode}
-            entryId={id}
-            defaultValue={title}
-          />
+        {isMatchingId ? (
+          <EntryInput entryId={id} defaultValue={title} />
         ) : (
           <p
             className={`${

@@ -19,7 +19,8 @@ const AddEntityPopover = ({
   folderId,
   children,
 }: Props) => {
-  const setInputMode = useEntryStore((state) => state.setInputMode);
+  const setInputMode = useEntryStore((state) => state.actions.setInputMode);
+
   const handleClick = (
     e: React.MouseEvent,
     entryType: InputMode["entryType"]
@@ -32,6 +33,7 @@ const AddEntityPopover = ({
     });
     onOpenChange(false);
   };
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
