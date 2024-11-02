@@ -19,3 +19,11 @@ export const createEntry = graphql(`
     }
   }
 `);
+
+export const deleteEntry = graphql(`
+  mutation DeleteEntry($entryId: Int!) {
+    deleteEntry(entryId: $entryId) {
+      id
+    }
+  }
+`);

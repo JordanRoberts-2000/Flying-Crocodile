@@ -23,4 +23,16 @@ impl EntryMutation {
 
         Ok(entry)
     }
+
+    async fn delete_entry(&self, ctx: &Context<'_>, entry_id: i32) -> Result<Entry> {
+        let pool = ctx.data::<Db>()?.clone();
+
+        let deleted_entry = web::block(move || {
+            let mut conn = pool.get().expect("Failed to get DB connection from pool");
+            diesel::delete(entries.filter(id.eq(entry_id))).get_result(&mut conn)
+        })
+        .await??;
+
+        Ok(deleted_entry)
+    }
 }

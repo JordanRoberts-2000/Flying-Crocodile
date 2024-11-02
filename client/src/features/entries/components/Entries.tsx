@@ -21,17 +21,17 @@ const Entries = ({}) => {
     <div className="px-2 flex-1 flex flex-col">
       {(editMode || !entries.length) && (
         <AddEntityPopover
+          embedLevel={1}
           folderId={TEMP_ROOT_ID}
           onOpenChange={setPopoverOpen}
           open={popoverOpen}
+          className="border border-gray-200 py-2 mt-4 rounded-md w-full"
         >
-          <button className="border border-gray-200 py-2 mt-4 rounded-md w-full">
-            Add entry
-          </button>
+          Add entry
         </AddEntityPopover>
       )}
       <ul className="flex flex-col flex-1 pt-4 gap-0.5">
-        {isMatchingId && <EntryInput entryId={TEMP_ROOT_ID} />}
+        {isMatchingId && <EntryInput />}
         {entries.map((entry) =>
           entry.isFolder ? (
             <EntryFolder

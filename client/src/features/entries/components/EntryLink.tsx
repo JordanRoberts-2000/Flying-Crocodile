@@ -34,7 +34,7 @@ const EntryLink = ({ id, title, embedLevel }: Props) => {
         }`}
       />
       {isMatchingId ? (
-        <EntryInput entryId={id} defaultValue={title} />
+        <EntryInput defaultValue={title} />
       ) : (
         <p
           className={`${
@@ -49,7 +49,7 @@ const EntryLink = ({ id, title, embedLevel }: Props) => {
           <button onClick={(e) => handleClick(e)}>
             <EditIcon className="text-gray-400 size-5" />
           </button>
-          <AreYouSureDialog>
+          <AreYouSureDialog entryId={id}>
             <BinIcon className="text-red-400 size-5" />
           </AreYouSureDialog>
         </div>

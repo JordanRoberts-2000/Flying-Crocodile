@@ -46,18 +46,13 @@ const EntryFolder = ({ id, title, embedLevel }: Props) => {
       >
         {editMode ? (
           <AddEntityPopover
+            embedLevel={embedLevel}
             folderId={id}
             open={popoverOpen}
             onOpenChange={setPopoverOpen}
+            className="border-neutral-200 p-1 flex items-center justify-center border size-6 rounded-full"
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="border-neutral-200 p-1 flex items-center justify-center border size-6 rounded-full"
-            >
-              <PlusIcon className="size-4" />
-            </button>
+            <PlusIcon className="size-4" />
           </AddEntityPopover>
         ) : (
           <FolderIcon
@@ -69,7 +64,7 @@ const EntryFolder = ({ id, title, embedLevel }: Props) => {
           />
         )}
         {isMatchingId ? (
-          <EntryInput entryId={id} defaultValue={title} />
+          <EntryInput defaultValue={title} />
         ) : (
           <p
             className={`${
@@ -91,7 +86,7 @@ const EntryFolder = ({ id, title, embedLevel }: Props) => {
               <button onClick={(e) => handleClick(e)}>
                 <EditIcon className="text-gray-400 size-5" />
               </button>
-              <AreYouSureDialog>
+              <AreYouSureDialog entryId={id}>
                 <BinIcon className="text-red-400 size-5" />
               </AreYouSureDialog>
             </>

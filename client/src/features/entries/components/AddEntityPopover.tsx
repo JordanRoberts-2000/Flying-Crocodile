@@ -5,19 +5,23 @@ import {
 } from "@/components/ui/popover";
 import useEntryStore from "../store";
 import { InputMode } from "../entryTypes";
+import { EMBEDDED_FOLDER_LIMIT } from "@/constants";
 
 type Props = {
   folderId: number;
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  embedLevel: number;
   children: React.ReactNode;
-};
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const AddEntityPopover = ({
   open,
   onOpenChange,
   folderId,
+  embedLevel,
   children,
+  ...rest
 }: Props) => {
   const setInputMode = useEntryStore((state) => state.actions.setInputMode);
 
@@ -33,10 +37,15 @@ const AddEntityPopover = ({
     });
     onOpenChange(false);
   };
-
+  if (embedLevel > EMBEDDED_FOLDER_LIMIT)
+    return (
+      <button {...rest} onClick={(e) => handleClick(e, "link")}>
+        {children}
+      </button>
+    );
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverTrigger {...rest}>{children}</PopoverTrigger>
       <PopoverContent className="flex flex-col w-fit p-1 gap-1">
         <button
           onClick={(e) => handleClick(e, "folder")}

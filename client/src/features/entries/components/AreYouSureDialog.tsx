@@ -7,12 +7,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import useDeleteEntry from "../hooks/useDeleteEntry";
 
-const areYouSureDialog = ({ children }: { children: React.ReactNode }) => {
+type Props = {
+  entryId: number;
+  children: React.ReactNode;
+};
+
+const areYouSureDialog = ({ children, entryId }: Props) => {
+  const deleteEntry = useDeleteEntry();
   const handleDeleteEntry = () => {
-    console.log("delete");
-    // trigger are you sure
-    // delete mutation
+    deleteEntry.mutate(entryId);
   };
   return (
     <div onClick={(e) => e.stopPropagation()} className="contents">
@@ -30,12 +35,14 @@ const areYouSureDialog = ({ children }: { children: React.ReactNode }) => {
             <DialogClose asChild>
               <button className="px-4 py-2 rounded-md">Cancel</button>
             </DialogClose>
-            <button
-              className="px-4 py-2 bg-red-800 text-white rounded-md"
-              onClick={() => handleDeleteEntry()}
-            >
-              Delete
-            </button>
+            <DialogClose asChild>
+              <button
+                className="px-4 py-2 bg-red-800 text-white rounded-md"
+                onClick={() => handleDeleteEntry()}
+              >
+                Delete
+              </button>
+            </DialogClose>
           </div>
         </DialogContent>
       </Dialog>

@@ -5,11 +5,12 @@ import {
   CreateEntryMutationVariables,
 } from "../../../gql/graphql";
 import { createEntry } from "@/features/entries/api/entryQueries";
+import { API_BASE_URL } from "@/constants";
 
 const useCreateEntry = () => {
   return useMutation<CreateEntryMutation, Error, CreateEntryMutationVariables>({
     mutationFn: async (variables) => {
-      return request("http://localhost:3000/graphql", createEntry, variables);
+      return request(API_BASE_URL, createEntry, variables);
     },
   });
 };
