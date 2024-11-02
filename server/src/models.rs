@@ -13,7 +13,7 @@ pub struct Entry {
 }
 
 #[derive(Deserialize, Insertable, InputObject)]
-#[table_name = "entries"]
+#[diesel(table_name = entries)]
 pub struct NewEntry {
     pub title: String,
     pub parent_id: Option<i32>,

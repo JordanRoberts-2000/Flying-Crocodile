@@ -17,6 +17,7 @@ const documents = {
     "\n  query GetEntries {\n    getEntries {\n      id\n      title\n      isFolder\n    }\n  }\n": types.GetEntriesDocument,
     "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      parentId\n      title\n      isFolder\n    }\n  }\n": types.CreateEntryDocument,
     "\n  mutation DeleteEntry($entryId: Int!) {\n    deleteEntry(entryId: $entryId) {\n      id\n    }\n  }\n": types.DeleteEntryDocument,
+    "\n  mutation UpdateEntry($entryId: Int!, $newTitle: String!) {\n    updateEntry(entryId: $entryId, newTitle: $newTitle) {\n      id\n      title\n    }\n  }\n": types.UpdateEntryDocument,
 };
 
 /**
@@ -45,6 +46,10 @@ export function graphql(source: "\n  mutation CreateEntry($newEntry: NewEntry!) 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteEntry($entryId: Int!) {\n    deleteEntry(entryId: $entryId) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteEntry($entryId: Int!) {\n    deleteEntry(entryId: $entryId) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateEntry($entryId: Int!, $newTitle: String!) {\n    updateEntry(entryId: $entryId, newTitle: $newTitle) {\n      id\n      title\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateEntry($entryId: Int!, $newTitle: String!) {\n    updateEntry(entryId: $entryId, newTitle: $newTitle) {\n      id\n      title\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

@@ -35,4 +35,23 @@ impl EntryMutation {
 
         Ok(deleted_entry)
     }
+
+    async fn update_entry(
+        &self,
+        ctx: &Context<'_>,
+        entry_id: i32,
+        new_title: String,
+    ) -> Result<Entry> {
+        let pool = ctx.data::<Db>()?.clone();
+
+        let updated_entry = web::block(move || {
+            let mut conn = pool.get().expect("Failed to get DB connection from pool");
+            diesel::update(entries.filter(id.eq(entry_id)))
+                .set(title.eq(new_title))
+                .get_result(&mut conn)
+        })
+        .await??;
+
+        Ok(updated_entry)
+    }
 }

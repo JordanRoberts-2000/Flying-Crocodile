@@ -3,6 +3,7 @@ import FolderIcon from "../../../assets/svgs/folderPlus.svg?react";
 import ImageIcon from "../../../assets/svgs/photo.svg?react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useEntryStore from "../store";
+import useUpdateEntry from "../hooks/useEditEntry";
 
 type Props = React.InputHTMLAttributes<HTMLInputElement>;
 
@@ -12,12 +13,13 @@ const EntryInput = ({ ...rest }: Props) => {
     (state) => state.entryInputMode
   );
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const mutation = useCreateEntry();
+  const createEntry = useCreateEntry();
+  const editEntry = useUpdateEntry();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "add") {
-      mutation.mutate({
+      createEntry.mutate({
         newEntry: {
           isFolder: entryType === "folder",
           title: inputRef.current!.value,
@@ -25,7 +27,10 @@ const EntryInput = ({ ...rest }: Props) => {
         },
       });
     } else {
-      // handle edit mutation
+      editEntry.mutate({
+        newTitle: inputRef.current!.value,
+        entryId: id!,
+      });
     }
     clearInputMode();
   };

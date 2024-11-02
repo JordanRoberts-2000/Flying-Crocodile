@@ -27,3 +27,12 @@ export const deleteEntry = graphql(`
     }
   }
 `);
+
+export const updateEntry = graphql(`
+  mutation UpdateEntry($entryId: Int!, $newTitle: String!) {
+    updateEntry(entryId: $entryId, newTitle: $newTitle) {
+      id
+      title
+    }
+  }
+`);
