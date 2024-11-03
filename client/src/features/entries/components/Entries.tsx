@@ -15,8 +15,13 @@ const Entries = ({}) => {
   const { data: entries } = useGetEntries(["gallery", rootId]);
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error</div>;
+  if (isLoading)
+    return (
+      <div className="flex-1 bg-gray-50 animate-pulse flex items-center justify-center">
+        <div className="size-10 border-l-0 border-2 rounded-full border-gray-700 animate-spin" />
+      </div>
+    );
+  if (error) return <div>Error Tap to retry</div>;
   if (!entries) return;
   return (
     <div className="px-2 pl-4 flex-1 flex flex-col">

@@ -1,6 +1,11 @@
+import request from "graphql-request";
 import { graphql } from "../../../gql/gql";
+import { API_BASE_URL } from "@/constants";
+import { GetRootEntryQuery, GetRootEntryQueryVariables } from "@/gql/graphql";
+import sortEntries from "../utils/sortEntries";
+import { QueryClient } from "@tanstack/react-query";
 
-export const getRootEntry = graphql(`
+const getRootEntry = graphql(`
   query GetRootEntry($title: String!) {
     getRootEntries(title: $title) {
       rootId
@@ -12,6 +17,22 @@ export const getRootEntry = graphql(`
     }
   }
 `);
+
+export const fetchRootEntry = async (
+  title: string,
+  queryClient: QueryClient
+) => {
+  const data = await request<GetRootEntryQuery, GetRootEntryQueryVariables>(
+    API_BASE_URL,
+    getRootEntry,
+    { title }
+  );
+
+  const { rootId, entries } = data.getRootEntries;
+  queryClient.setQueryData(["gallery", rootId], sortEntries(entries));
+
+  return rootId;
+};
 
 export const getEntries = graphql(`
   query GetEntries($parentId: Int) {

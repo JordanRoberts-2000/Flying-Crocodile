@@ -26,7 +26,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
-  const { data: entries = [] } = useGetEntries(queryPath);
+  const { data: entries = [], isLoading, error } = useGetEntries(queryPath);
 
   const entryId = getEntryId(queryPath);
   const isOptimisticEntry = entryId === -1;
@@ -135,41 +135,50 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           </div>
         </div>
       </EditEntityPopover>
-      {folderOpen && (!!entries.length || addingEntry) && (
-        <div className="flex py-1 pr-2">
-          <Separator orientation="vertical" className="ml-2" />
-          <ul className="flex flex-col pl-4 w-full gap-0.5">
-            {addingEntry && (
-              <li>
-                <EntryInput
-                  embedLevel={embedLevel + 1}
-                  addingEntry={addingEntry}
-                  mode="add"
-                  queryPath={queryPath}
-                  setAddingEntry={setAddingEntry}
-                />
-              </li>
-            )}
-            {entries.map((entry) =>
-              entry.isFolder ? (
-                <EntryFolder
-                  key={entry.id}
-                  embedLevel={embedLevel + 1}
-                  title={entry.title}
-                  queryPath={[...queryPath, entry.id]}
-                />
-              ) : (
-                <EntryLink
-                  key={entry.id}
-                  embedLevel={embedLevel + 1}
-                  title={entry.title}
-                  queryPath={[...queryPath, entry.id]}
-                />
-              )
-            )}
-          </ul>
+      {folderOpen && error && <div>Error Tap to retry</div>}
+      {folderOpen && isLoading && (
+        <div className="w-full p-3 bg-gray-50 animate-pulse flex items-center justify-center">
+          <div className="size-6 border-l-0 border-2 rounded-full border-gray-700 animate-spin" />
         </div>
       )}
+      {folderOpen &&
+        !isLoading &&
+        !error &&
+        (!!entries.length || addingEntry) && (
+          <div className="flex py-1 pr-2">
+            <Separator orientation="vertical" className="ml-2" />
+            <ul className="flex flex-col pl-4 w-full gap-0.5">
+              {addingEntry && (
+                <li>
+                  <EntryInput
+                    embedLevel={embedLevel + 1}
+                    addingEntry={addingEntry}
+                    mode="add"
+                    queryPath={queryPath}
+                    setAddingEntry={setAddingEntry}
+                  />
+                </li>
+              )}
+              {entries.map((entry) =>
+                entry.isFolder ? (
+                  <EntryFolder
+                    key={entry.id}
+                    embedLevel={embedLevel + 1}
+                    title={entry.title}
+                    queryPath={[...queryPath, entry.id]}
+                  />
+                ) : (
+                  <EntryLink
+                    key={entry.id}
+                    embedLevel={embedLevel + 1}
+                    title={entry.title}
+                    queryPath={[...queryPath, entry.id]}
+                  />
+                )
+              )}
+            </ul>
+          </div>
+        )}
     </li>
   );
 };
