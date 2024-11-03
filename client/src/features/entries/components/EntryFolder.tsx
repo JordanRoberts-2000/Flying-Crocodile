@@ -106,7 +106,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
             <EntryInput
               defaultValue={title}
               mode="edit"
-              mutateId={getEntryId(queryPath)}
+              queryPath={queryPath}
               addingEntry="folder"
               setEditingActive={setEditingActive}
             />
@@ -138,7 +138,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
                 <EntryInput
                   addingEntry={addingEntry}
                   mode="add"
-                  mutateId={getEntryId(queryPath)}
+                  queryPath={queryPath}
                   setAddingEntry={setAddingEntry}
                 />
               </li>

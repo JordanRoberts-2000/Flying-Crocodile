@@ -3,12 +3,13 @@ import FolderIcon from "../../../assets/svgs/folderPlus.svg?react";
 import ImageIcon from "../../../assets/svgs/photo.svg?react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
-import { AddingEntry } from "../entryTypes";
+import { AddingEntry, QueryPath } from "../entryTypes";
+import getEntryId from "../utils/getId";
 
 type Props = {
   addingEntry: Exclude<AddingEntry, false>;
   mode: "add" | "edit";
-  mutateId: number;
+  queryPath: QueryPath;
   setEditingActive?: React.Dispatch<React.SetStateAction<boolean>>;
   setAddingEntry?: React.Dispatch<React.SetStateAction<AddingEntry>>;
 } & React.InputHTMLAttributes<HTMLInputElement>;
@@ -16,7 +17,7 @@ type Props = {
 const EntryInput = ({
   addingEntry,
   mode,
-  mutateId,
+  queryPath,
   setEditingActive,
   setAddingEntry,
   ...rest
@@ -33,7 +34,7 @@ const EntryInput = ({
           newEntry: {
             isFolder: addingEntry === "folder",
             title: inputRef.current!.value,
-            parentId: mutateId,
+            parentId: getEntryId(queryPath),
           },
         },
         {
@@ -43,11 +44,12 @@ const EntryInput = ({
           },
         }
       );
-    } else {
+    }
+    if (mode === "edit") {
       editEntry.mutate(
         {
           newTitle: inputRef.current!.value,
-          entryId: mutateId,
+          queryPath,
         },
         {
           onSuccess: () => {

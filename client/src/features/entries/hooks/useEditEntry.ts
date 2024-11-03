@@ -1,24 +1,63 @@
 import request from "graphql-request";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
+import { QueryPath } from "../entryTypes";
+import getEntryId from "../utils/getId";
+import { Entry } from "@/gql/graphql";
 
 const useUpdateEntry = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
-      entryId,
+      queryPath,
       newTitle,
     }: {
-      entryId: number;
+      queryPath: QueryPath;
       newTitle: string;
     }) => {
-      return request(API_BASE_URL, updateEntry, { entryId, newTitle });
+      return request(API_BASE_URL, updateEntry, {
+        entryId: getEntryId(queryPath),
+        newTitle,
+      });
     },
-    onError: () => {
-      console.log("Edit failed");
+    onMutate: async ({ queryPath, newTitle }) => {
+      const parentQueryPath = queryPath.slice(0, -1);
+      await queryClient.cancelQueries({ queryKey: parentQueryPath });
+
+      const previousEntries =
+        queryClient.getQueryData<Entry[]>(parentQueryPath);
+
+      if (previousEntries) {
+        queryClient.setQueryData<Entry[]>(parentQueryPath, (old) =>
+          old
+            ? old.map((entry) =>
+                entry.id !== getEntryId(queryPath)
+                  ? entry
+                  : { ...entry, title: newTitle }
+              )
+            : []
+        );
+      }
+      return { previousEntries };
     },
-    onSuccess: () => {
-      console.log("edit successful");
+    onError: (error, { queryPath }, context) => {
+      console.log(error);
+      // toast({
+      //   title: "Edit Failed",
+      //   description: error instanceof Error ? error.message : "An unknown error occurred",
+      //   status: "error",
+      // });
+
+      if (context?.previousEntries) {
+        queryClient.setQueryData(
+          queryPath.slice(0, -1),
+          context.previousEntries
+        );
+      }
+    },
+    onSettled: (_data, _error, { queryPath }) => {
+      queryClient.invalidateQueries({ queryKey: queryPath.slice(0, -1) });
     },
   });
 };

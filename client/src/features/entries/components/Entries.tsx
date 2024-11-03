@@ -35,7 +35,7 @@ const Entries = ({}) => {
             setAddingEntry={setAddingEntry}
             addingEntry={addingEntry}
             mode="add"
-            mutateId={rootId}
+            queryPath={["gallery", rootId]}
           />
         )}
         {entries.map((entry) =>

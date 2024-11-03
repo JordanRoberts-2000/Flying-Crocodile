@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import EditEntityPopover from "./popovers/EditEntryPopover";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
 import { QueryPath } from "../entryTypes";
-import getEntryId from "../utils/getId";
 
 type Props = {
   queryPath: QueryPath;
@@ -67,7 +66,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
             defaultValue={title}
             mode="edit"
             addingEntry="link"
-            mutateId={getEntryId(queryPath)}
+            queryPath={queryPath}
             setEditingActive={setEditingActive}
           />
         ) : (

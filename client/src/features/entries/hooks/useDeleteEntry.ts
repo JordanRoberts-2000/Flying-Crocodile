@@ -46,6 +46,9 @@ const useDeleteEntry = () => {
     onSuccess: (_newData, queryPath) => {
       queryClient.removeQueries({ queryKey: queryPath });
     },
+    onSettled: (_data, _error, queryPath) => {
+      queryClient.invalidateQueries({ queryKey: queryPath.slice(0, -1) });
+    },
   });
 };
 
