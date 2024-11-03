@@ -59,7 +59,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   return (
     <li className="flex flex-col">
       <EditEntityPopover
-        deleteId={getEntryId(queryPath)}
+        queryPath={queryPath}
         isFolder={true}
         open={editPopoverOpen}
         onOpenChange={setEditPopoverOpen}

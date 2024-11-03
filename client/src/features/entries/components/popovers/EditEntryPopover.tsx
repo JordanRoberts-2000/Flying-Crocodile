@@ -4,12 +4,13 @@ import EditIcon from "../../../../assets/svgs/edit.svg?react";
 import BinIcon from "../../../../assets/svgs/bin.svg?react";
 import AreYouSureDialog from "../areYouSureDialog";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { QueryPath } from "../../entryTypes";
 
 type Props = {
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   setEditingActive: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteId: number;
+  queryPath: QueryPath;
   isFolder: boolean;
   children: React.ReactNode;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -20,7 +21,7 @@ const EditEntityPopover = ({
   children,
   isFolder,
   setEditingActive,
-  deleteId,
+  queryPath,
 }: Props) => {
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -59,7 +60,7 @@ const EditEntityPopover = ({
             </DialogTrigger>
           </PopoverContent>
         </Popover>
-        <AreYouSureDialog entryId={deleteId} />
+        <AreYouSureDialog queryPath={queryPath} />
       </Dialog>
     </div>
   );

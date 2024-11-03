@@ -42,7 +42,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
 
   return (
     <EditEntityPopover
-      deleteId={getEntryId(queryPath)}
+      queryPath={queryPath}
       isFolder={false}
       open={editPopoverOpen}
       onOpenChange={setEditPopoverOpen}
