@@ -1,4 +1,4 @@
-export const EMBEDDED_FOLDER_LIMIT = 2;
+export const EMBEDDED_FOLDER_LIMIT = 3;
 
 export const HOLD_TO_TRIGGER_MS = 300;
 

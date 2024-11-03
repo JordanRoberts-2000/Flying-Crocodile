@@ -8,6 +8,7 @@ import getEntryId from "../utils/getId";
 
 type Props = {
   addingEntry: Exclude<AddingEntry, false>;
+  embedLevel: number;
   mode: "add" | "edit";
   queryPath: QueryPath;
   setEditingActive?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,6 +17,7 @@ type Props = {
 
 const EntryInput = ({
   addingEntry,
+  embedLevel,
   mode,
   queryPath,
   setEditingActive,
@@ -26,52 +28,42 @@ const EntryInput = ({
   const createEntry = useCreateEntry();
   const editEntry = useUpdateEntry();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "add") {
-      createEntry.mutate(
-        {
-          newEntry: {
-            isFolder: addingEntry === "folder",
-            title: inputRef.current!.value,
-            parentId: getEntryId(queryPath),
-          },
+      createEntry.mutate({
+        newEntry: {
+          isFolder: addingEntry === "folder",
+          title: inputRef.current!.value,
+          parentId: getEntryId(queryPath),
         },
-        {
-          onSuccess: () => {
-            console.log("added successfully");
-            if (setAddingEntry) setAddingEntry(false);
-          },
-        }
-      );
+        queryPath,
+        setAddingEntry: setAddingEntry,
+      });
     }
     if (mode === "edit") {
-      editEntry.mutate(
-        {
-          newTitle: inputRef.current!.value,
-          queryPath,
-        },
-        {
-          onSuccess: () => {
-            if (setEditingActive) setEditingActive(false);
-          },
-        }
-      );
+      editEntry.mutate({
+        newTitle: inputRef.current!.value,
+        queryPath,
+        setEditingActive,
+      });
     }
   };
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="w-full relative">
       {mode === "add" &&
         (addingEntry === "folder" ? (
-          <FolderIcon className="size-6 min-w-6 absolute left-4 top-1/2 -translate-y-1/2" />
+          <FolderIcon className="size-4 min-w-4 absolute left-4 top-1/2 -translate-y-1/2" />
         ) : (
-          <ImageIcon className="size-6 min-w-6 absolute left-4 top-1/2 -translate-y-1/2" />
+          <ImageIcon className="size-4 min-w-4 absolute left-4 top-1/2 -translate-y-1/2" />
         ))}
 
       <input
         {...rest}
         onClick={(e) => e.stopPropagation()}
-        className="w-full p-2 pl-14 font-semibold"
+        className={`w-full ${embedLevel >= 2 ? "p-1" : "p-2"} ${
+          mode === "add" && "pl-14"
+        } font-semibold`}
         placeholder={addingEntry === "folder" ? "Folder name" : "Gallery name"}
         ref={inputRef}
         autoFocus

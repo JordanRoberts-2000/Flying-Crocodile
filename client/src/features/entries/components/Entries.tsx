@@ -11,11 +11,13 @@ import useGetEntries from "../hooks/useGetEntries";
 
 const Entries = ({}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { data: rootId, isLoading, isSuccess } = useGetRootEntries("gallery");
+  const { data: rootId, isLoading, error } = useGetRootEntries("gallery");
   const { data: entries } = useGetEntries(["gallery", rootId]);
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
 
-  if (isLoading || !isSuccess || !entries) return;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error</div>;
+  if (!entries) return;
   return (
     <div className="px-2 pl-4 flex-1 flex flex-col">
       <AddEntityPopover
@@ -23,7 +25,7 @@ const Entries = ({}) => {
         isRoot={true}
         onOpenChange={setPopoverOpen}
         embedLevel={1}
-        folderId={rootId}
+        folderId={rootId!}
         setAddingEntry={setAddingEntry}
         className="pt-2 pb-1 hover:text-blue-600 w-fit"
       >
@@ -32,6 +34,7 @@ const Entries = ({}) => {
       <ul className="flex flex-col flex-1 gap-0.5">
         {addingEntry && (
           <EntryInput
+            embedLevel={1}
             setAddingEntry={setAddingEntry}
             addingEntry={addingEntry}
             mode="add"

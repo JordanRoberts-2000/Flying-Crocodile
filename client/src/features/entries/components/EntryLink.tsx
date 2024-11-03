@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import EditEntityPopover from "./popovers/EditEntryPopover";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
 import { QueryPath } from "../entryTypes";
+import getEntryId from "../utils/getId";
 
 type Props = {
   queryPath: QueryPath;
@@ -16,6 +17,9 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
   const [editingActive, setEditingActive] = useState(false);
+
+  const entryId = getEntryId(queryPath);
+  const isOptimisticEntry = entryId === -1;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -51,7 +55,9 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
         onContextMenu={handleContextMenu}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
-        className="flex items-center py-2 px-2 hover:bg-gray-50 transition-colors rounded-md"
+        className={`${
+          isOptimisticEntry && "hover:opacity-15 pointer-events-none"
+        } flex items-center py-2 px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer`}
       >
         <div className={`${embedLevel >= 2 ? " p-1" : " p-1.5"}`}>
           <ImageIcon
@@ -63,6 +69,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
         </div>
         {editingActive ? (
           <EntryInput
+            embedLevel={embedLevel}
             defaultValue={title}
             mode="edit"
             addingEntry="link"

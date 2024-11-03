@@ -5,23 +5,24 @@ import { API_BASE_URL } from "@/constants";
 import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
 import { Entry } from "@/gql/graphql";
+import sortEntries from "../utils/sortEntries";
+
+type MutationVariables = {
+  queryPath: QueryPath;
+  newTitle: string;
+  setEditingActive?: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 const useUpdateEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      queryPath,
-      newTitle,
-    }: {
-      queryPath: QueryPath;
-      newTitle: string;
-    }) => {
+    mutationFn: async ({ queryPath, newTitle }: MutationVariables) => {
       return request(API_BASE_URL, updateEntry, {
         entryId: getEntryId(queryPath),
         newTitle,
       });
     },
-    onMutate: async ({ queryPath, newTitle }) => {
+    onMutate: async ({ queryPath, newTitle, setEditingActive }) => {
       const parentQueryPath = queryPath.slice(0, -1);
       await queryClient.cancelQueries({ queryKey: parentQueryPath });
 
@@ -31,13 +32,16 @@ const useUpdateEntry = () => {
       if (previousEntries) {
         queryClient.setQueryData<Entry[]>(parentQueryPath, (old) =>
           old
-            ? old.map((entry) =>
-                entry.id !== getEntryId(queryPath)
-                  ? entry
-                  : { ...entry, title: newTitle }
+            ? sortEntries(
+                old.map((entry) =>
+                  entry.id !== getEntryId(queryPath)
+                    ? entry
+                    : { ...entry, title: newTitle }
+                )
               )
             : []
         );
+        if (setEditingActive) setEditingActive(false);
       }
       return { previousEntries };
     },

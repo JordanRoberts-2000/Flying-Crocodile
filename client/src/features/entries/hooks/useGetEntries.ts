@@ -23,9 +23,10 @@ const useGetEntries = (queryPath: QueryPath) => {
           parentId: getEntryId(queryPath),
         }
       );
-      return sortEntries(data.getEntries);
+      const egg = sortEntries(data.getEntries);
+      return egg;
     },
-    enabled: rootId !== undefined,
+    enabled: rootId !== undefined && getEntryId(queryPath) !== -1,
   });
 };
 

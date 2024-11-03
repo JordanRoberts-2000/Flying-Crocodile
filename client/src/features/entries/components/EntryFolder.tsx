@@ -26,7 +26,10 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
-  const { data: entries, isLoading, isSuccess } = useGetEntries(queryPath);
+  const { data: entries = [] } = useGetEntries(queryPath);
+
+  const entryId = getEntryId(queryPath);
+  const isOptimisticEntry = entryId === -1;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -54,10 +57,12 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
     setEditPopoverOpen(true);
   };
 
-  if (isLoading || !isSuccess) return null;
-
   return (
-    <li className="flex flex-col">
+    <li
+      className={`${
+        isOptimisticEntry && "pointer-events-none hover:opacity-15"
+      } flex flex-col`}
+    >
       <EditEntityPopover
         queryPath={queryPath}
         isFolder={true}
@@ -82,8 +87,8 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           >
             <AddEntityPopover
               setFolderOpen={setFolderOpen}
-              embedLevel={embedLevel}
-              folderId={getEntryId(queryPath)}
+              embedLevel={embedLevel + 1}
+              folderId={entryId}
               open={addPopoverOpen}
               onOpenChange={setAddPopoverOpen}
               setAddingEntry={setAddingEntry}
@@ -104,6 +109,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
 
           {editingActive ? (
             <EntryInput
+              embedLevel={embedLevel}
               defaultValue={title}
               mode="edit"
               queryPath={queryPath}
@@ -136,6 +142,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
             {addingEntry && (
               <li>
                 <EntryInput
+                  embedLevel={embedLevel + 1}
                   addingEntry={addingEntry}
                   mode="add"
                   queryPath={queryPath}
