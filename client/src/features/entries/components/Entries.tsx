@@ -12,6 +12,7 @@ const Entries = ({}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { data, isLoading, isSuccess } = useGetRootEntries("gallery");
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
+  const rootId = data?.rootId ?? 1;
   if (isLoading || !isSuccess) return;
   return (
     <div className="px-2 pl-4 flex-1 flex flex-col">
@@ -20,7 +21,7 @@ const Entries = ({}) => {
         isRoot={true}
         onOpenChange={setPopoverOpen}
         embedLevel={1}
-        folderId={data?.rootId ?? 1}
+        folderId={rootId}
         setAddingEntry={setAddingEntry}
         className="pt-2 pb-1 hover:text-blue-600 w-fit"
       >
@@ -32,24 +33,23 @@ const Entries = ({}) => {
             setAddingEntry={setAddingEntry}
             addingEntry={addingEntry}
             mode="add"
-            mutateId={data.rootId ?? 1}
+            mutateId={rootId}
           />
         )}
         {data.entries.map((entry) =>
           entry.isFolder ? (
             <EntryFolder
               key={entry.id}
-              id={entry.id}
-              parentId={data?.rootId ?? 1}
               embedLevel={1}
               title={entry.title}
+              queryPath={["gallery", rootId, entry.id]}
             />
           ) : (
             <EntryLink
               key={entry.id}
               embedLevel={1}
               title={entry.title}
-              id={entry.id}
+              queryPath={["gallery", rootId, entry.id]}
             />
           )
         )}

@@ -3,14 +3,16 @@ import EntryInput from "./EntryInput";
 import { useRef, useState } from "react";
 import EditEntityPopover from "./popovers/EditEntryPopover";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
+import { QueryPath } from "../entryTypes";
+import getEntryId from "../utils/getId";
 
 type Props = {
-  id: number;
+  queryPath: QueryPath;
   title: string;
   embedLevel: number;
 };
 
-const EntryLink = ({ id, title, embedLevel }: Props) => {
+const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
   const [editPopoverOpen, setEditPopoverOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
@@ -40,7 +42,7 @@ const EntryLink = ({ id, title, embedLevel }: Props) => {
 
   return (
     <EditEntityPopover
-      deleteId={id}
+      deleteId={getEntryId(queryPath)}
       isFolder={false}
       open={editPopoverOpen}
       onOpenChange={setEditPopoverOpen}
@@ -65,7 +67,7 @@ const EntryLink = ({ id, title, embedLevel }: Props) => {
             defaultValue={title}
             mode="edit"
             addingEntry="link"
-            mutateId={id}
+            mutateId={getEntryId(queryPath)}
             setEditingActive={setEditingActive}
           />
         ) : (

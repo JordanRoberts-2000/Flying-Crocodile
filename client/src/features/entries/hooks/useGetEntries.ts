@@ -8,16 +8,18 @@ import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import sortEntries from "../utils/sortEntries";
 import { API_BASE_URL } from "@/constants";
+import { QueryPath } from "../entryTypes";
+import getEntryId from "../utils/getId";
 
-const useGetEntries = (parentId: number[]) => {
+const useGetEntries = (queryPath: QueryPath) => {
   return useQuery<Entry[], Error>({
-    queryKey: ["gallery", ...parentId],
+    queryKey: queryPath,
     queryFn: async () => {
       const data = await request<GetEntriesQuery, GetEntriesQueryVariables>(
         API_BASE_URL,
         getEntries,
         {
-          parentId: parentId[parentId.length - 1],
+          parentId: getEntryId(queryPath),
         }
       );
       return sortEntries(data.getEntries);

@@ -8,17 +8,17 @@ import useGetEntries from "../hooks/useGetEntries";
 import { Separator } from "@/components/ui/separator";
 import EntryLink from "./EntryLink";
 import EditEntityPopover from "./popovers/EditEntryPopover";
-import { AddingEntry } from "../entryTypes";
+import { AddingEntry, QueryPath } from "../entryTypes";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
+import getEntryId from "../utils/getId";
 
 type Props = {
-  id: number;
-  parentId: number;
   title: string;
   embedLevel: number;
+  queryPath: QueryPath;
 };
 
-const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
+const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const [addPopoverOpen, setAddPopoverOpen] = useState(false);
   const [editPopoverOpen, setEditPopoverOpen] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
@@ -26,7 +26,7 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
-  const { data: entries, isLoading, isSuccess } = useGetEntries([id]);
+  const { data: entries, isLoading, isSuccess } = useGetEntries(queryPath);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -59,7 +59,7 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
   return (
     <li className="flex flex-col">
       <EditEntityPopover
-        deleteId={id}
+        deleteId={getEntryId(queryPath)}
         isFolder={true}
         open={editPopoverOpen}
         onOpenChange={setEditPopoverOpen}
@@ -83,7 +83,7 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
             <AddEntityPopover
               setFolderOpen={setFolderOpen}
               embedLevel={embedLevel}
-              folderId={id}
+              folderId={getEntryId(queryPath)}
               open={addPopoverOpen}
               onOpenChange={setAddPopoverOpen}
               setAddingEntry={setAddingEntry}
@@ -106,7 +106,7 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
             <EntryInput
               defaultValue={title}
               mode="edit"
-              mutateId={id}
+              mutateId={getEntryId(queryPath)}
               addingEntry="folder"
               setEditingActive={setEditingActive}
             />
@@ -138,7 +138,7 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
                 <EntryInput
                   addingEntry={addingEntry}
                   mode="add"
-                  mutateId={id}
+                  mutateId={getEntryId(queryPath)}
                   setAddingEntry={setAddingEntry}
                 />
               </li>
@@ -147,17 +147,16 @@ const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
               entry.isFolder ? (
                 <EntryFolder
                   key={entry.id}
-                  id={entry.id}
-                  parentId={id}
                   embedLevel={embedLevel + 1}
                   title={entry.title}
+                  queryPath={[...queryPath, entry.id]}
                 />
               ) : (
                 <EntryLink
                   key={entry.id}
                   embedLevel={embedLevel + 1}
                   title={entry.title}
-                  id={entry.id}
+                  queryPath={[...queryPath, entry.id]}
                 />
               )
             )}

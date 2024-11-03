@@ -27,12 +27,7 @@ const AreYouSureDialog = ({ entryId }: Props) => {
       </DialogHeader>
       <div className="gap-4">
         <DialogClose asChild>
-          <button
-            className="px-4 py-2 rounded-md"
-            onClick={() => console.log("dino")}
-          >
-            Cancel
-          </button>
+          <button className="px-4 py-2 rounded-md">Cancel</button>
         </DialogClose>
         <DialogClose asChild>
           <button
