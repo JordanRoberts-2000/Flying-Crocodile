@@ -1,42 +1,46 @@
 import { useState } from "react";
-import useGetEntries from "../hooks/useGetEntries";
-import useEntryStore from "../store";
-import AddEntityPopover from "./AddEntityPopover";
+import AddEntityPopover from "./popovers/AddEntityPopover";
 import EntryInput from "./EntryInput";
 import EntryFolder from "./EntryFolder";
 import EntryLink from "./EntryLink";
 import { Separator } from "@/components/ui/separator";
-import useInputIdMatch from "../hooks/useInputIdMatch";
-
-const TEMP_ROOT_ID = 1;
+import useGetRootEntries from "../hooks/useGetRootEntry";
+import { AddingEntry } from "../entryTypes";
+import PlusIcon from "../../../assets/svgs/add.svg?react";
 
 const Entries = ({}) => {
-  const isMatchingId = useInputIdMatch(TEMP_ROOT_ID, "add");
-  const editMode = useEntryStore((state) => state.editMode);
-  const { data: entries, isLoading, isSuccess } = useGetEntries();
   const [popoverOpen, setPopoverOpen] = useState(false);
-
+  const { data, isLoading, isSuccess } = useGetRootEntries("gallery");
+  const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
   if (isLoading || !isSuccess) return;
   return (
-    <div className="px-2 flex-1 flex flex-col">
-      {(editMode || !entries.length) && (
-        <AddEntityPopover
-          embedLevel={1}
-          folderId={TEMP_ROOT_ID}
-          onOpenChange={setPopoverOpen}
-          open={popoverOpen}
-          className="border border-gray-200 py-2 mt-4 rounded-md w-full"
-        >
-          Add entry
-        </AddEntityPopover>
-      )}
-      <ul className="flex flex-col flex-1 pt-4 gap-0.5">
-        {isMatchingId && <EntryInput />}
-        {entries.map((entry) =>
+    <div className="px-2 pl-4 flex-1 flex flex-col">
+      <AddEntityPopover
+        open={popoverOpen}
+        isRoot={true}
+        onOpenChange={setPopoverOpen}
+        embedLevel={1}
+        folderId={data?.rootId ?? 1}
+        setAddingEntry={setAddingEntry}
+        className="pt-2 pb-1 hover:text-blue-600 w-fit"
+      >
+        <PlusIcon className="size-5 min-w-5" strokeWidth={2} />
+      </AddEntityPopover>
+      <ul className="flex flex-col flex-1 gap-0.5">
+        {addingEntry && (
+          <EntryInput
+            setAddingEntry={setAddingEntry}
+            addingEntry={addingEntry}
+            mode="add"
+            mutateId={data.rootId ?? 1}
+          />
+        )}
+        {data.entries.map((entry) =>
           entry.isFolder ? (
             <EntryFolder
               key={entry.id}
               id={entry.id}
+              parentId={data?.rootId ?? 1}
               embedLevel={1}
               title={entry.title}
             />

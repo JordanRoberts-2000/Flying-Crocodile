@@ -1,10 +1,8 @@
 import ImageIcon from "../../../assets/svgs/photo.svg?react";
-import EditIcon from "../../../assets/svgs/edit.svg?react";
-import BinIcon from "../../../assets/svgs/bin.svg?react";
-import useEntryStore from "../store";
 import EntryInput from "./EntryInput";
-import AreYouSureDialog from "./areYouSureDialog";
-import useInputIdMatch from "../hooks/useInputIdMatch";
+import { useRef, useState } from "react";
+import EditEntityPopover from "./popovers/EditEntryPopover";
+import { HOLD_TO_TRIGGER_MS } from "@/constants";
 
 type Props = {
   id: number;
@@ -13,48 +11,74 @@ type Props = {
 };
 
 const EntryLink = ({ id, title, embedLevel }: Props) => {
-  const editMode = useEntryStore((state) => state.editMode);
-  const isMatchingId = useInputIdMatch(id, "edit");
-  const setInputMode = useEntryStore((state) => state.actions.setInputMode);
+  const [editPopoverOpen, setEditPopoverOpen] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPress = useRef(false);
+  const [editingActive, setEditingActive] = useState(false);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setInputMode({
-      id: id,
-      mode: "edit",
-      entryType: "link",
-    });
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      isLongPress.current = false;
+      longPressTimer.current = setTimeout(() => {
+        isLongPress.current = true;
+        setEditPopoverOpen(true);
+      }, HOLD_TO_TRIGGER_MS);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditPopoverOpen(true);
   };
 
   return (
-    <li className="flex items-center py-2 px-2">
-      <ImageIcon
-        className={`${editMode && "opacity-15"} ${
-          embedLevel >= 2 ? "size-5" : "size-6 min-h-6 min-w-6"
-        }`}
-      />
-      {isMatchingId ? (
-        <EntryInput defaultValue={title} />
-      ) : (
-        <p
-          className={`${
-            embedLevel >= 2 && "text-sm"
-          } font-semibold ml-4 font-sans text-neutral-800 whitespace-nowrap overflow-hidden text-ellipsis`}
-        >
-          {title}
-        </p>
-      )}
-      {editMode && (
-        <div className="flex ml-auto items-center gap-2">
-          <button onClick={(e) => handleClick(e)}>
-            <EditIcon className="text-gray-400 size-5" />
-          </button>
-          <AreYouSureDialog entryId={id}>
-            <BinIcon className="text-red-400 size-5" />
-          </AreYouSureDialog>
+    <EditEntityPopover
+      deleteId={id}
+      isFolder={false}
+      open={editPopoverOpen}
+      onOpenChange={setEditPopoverOpen}
+      setEditingActive={setEditingActive}
+    >
+      <li
+        onContextMenu={handleContextMenu}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        className="flex items-center py-2 px-2 hover:bg-gray-50 transition-colors rounded-md"
+      >
+        <div className={`${embedLevel >= 2 ? " p-1" : " p-1.5"}`}>
+          <ImageIcon
+            strokeWidth={2}
+            className={`${
+              embedLevel >= 2 ? "size-5 min-w-5" : "size-6 min-w-6"
+            }`}
+          />
         </div>
-      )}
-    </li>
+        {editingActive ? (
+          <EntryInput
+            defaultValue={title}
+            mode="edit"
+            addingEntry="link"
+            mutateId={id}
+            setEditingActive={setEditingActive}
+          />
+        ) : (
+          <p
+            className={`${
+              embedLevel >= 2 && ""
+            } font-semibold ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis`}
+          >
+            {title}
+          </p>
+        )}
+      </li>
+    </EditEntityPopover>
   );
 };
 

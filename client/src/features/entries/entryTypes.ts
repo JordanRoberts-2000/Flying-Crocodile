@@ -1,5 +1,1 @@
-export type InputMode = {
-  id: number | null;
-  mode: "add" | "edit";
-  entryType: "folder" | "link";
-};
+export type AddingEntry = false | "folder" | "link";

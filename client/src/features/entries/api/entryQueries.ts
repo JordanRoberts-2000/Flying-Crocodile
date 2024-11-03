@@ -1,8 +1,21 @@
 import { graphql } from "../../../gql/gql";
 
+export const getRootEntry = graphql(`
+  query GetRootEntry($title: String!) {
+    getRootEntries(title: $title) {
+      rootId
+      entries {
+        id
+        title
+        isFolder
+      }
+    }
+  }
+`);
+
 export const getEntries = graphql(`
-  query GetEntries {
-    getEntries {
+  query GetEntries($parentId: Int) {
+    getEntries(parentId: $parentId) {
       id
       title
       isFolder

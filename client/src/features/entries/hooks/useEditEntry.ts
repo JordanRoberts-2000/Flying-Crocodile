@@ -14,11 +14,11 @@ const useUpdateEntry = () => {
     }) => {
       return request(API_BASE_URL, updateEntry, { entryId, newTitle });
     },
-    onError: (error) => {
-      console.error("Error updating entry title:", error);
+    onError: () => {
+      console.log("Edit failed");
     },
     onSuccess: () => {
-      console.log("Entry title updated successfully");
+      console.log("edit successful");
     },
   });
 };

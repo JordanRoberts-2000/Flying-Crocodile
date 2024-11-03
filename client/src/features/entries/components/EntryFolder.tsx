@@ -1,134 +1,169 @@
-import { useState } from "react";
-import EditIcon from "../../../assets/svgs/edit.svg?react";
-import BinIcon from "../../../assets/svgs/bin.svg?react";
+import { useRef, useState } from "react";
 import ArrowIcon from "../../../assets/svgs/arrow.svg?react";
 import FolderIcon from "../../../assets/svgs/folder.svg?react";
 import PlusIcon from "../../../assets/svgs/add.svg?react";
-import AddEntityPopover from "./AddEntityPopover";
-import useEntryStore from "../store";
+import AddEntityPopover from "./popovers/AddEntityPopover";
 import EntryInput from "./EntryInput";
-import AreYouSureDialog from "./areYouSureDialog";
-import useInputIdMatch from "../hooks/useInputIdMatch";
+import useGetEntries from "../hooks/useGetEntries";
+import { Separator } from "@/components/ui/separator";
+import EntryLink from "./EntryLink";
+import EditEntityPopover from "./popovers/EditEntryPopover";
+import { AddingEntry } from "../entryTypes";
+import { HOLD_TO_TRIGGER_MS } from "@/constants";
 
 type Props = {
   id: number;
+  parentId: number;
   title: string;
   embedLevel: number;
 };
 
-const EntryFolder = ({ id, title, embedLevel }: Props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
+const EntryFolder = ({ id, parentId, title, embedLevel }: Props) => {
+  const [addPopoverOpen, setAddPopoverOpen] = useState(false);
+  const [editPopoverOpen, setEditPopoverOpen] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
-  const editMode = useEntryStore((state) => state.editMode);
-  const isMatchingId = useInputIdMatch(id, "edit");
-  const setInputMode = useEntryStore((state) => state.actions.setInputMode);
+  const [editingActive, setEditingActive] = useState(false);
+  const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPress = useRef(false);
+  const { data: entries, isLoading, isSuccess } = useGetEntries([id]);
 
-  // Get embedded entries for this folder id
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setInputMode({
-      id: id,
-      mode: "edit",
-      entryType: "folder",
-    });
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      isLongPress.current = false;
+      longPressTimer.current = setTimeout(() => {
+        isLongPress.current = true;
+        setEditPopoverOpen(true);
+      }, HOLD_TO_TRIGGER_MS);
+    }
   };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+
+    if (e.button === 0 && !isLongPress.current) {
+      setFolderOpen((prev) => !prev);
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditPopoverOpen(true);
+  };
+
+  if (isLoading || !isSuccess) return null;
 
   return (
     <li className="flex flex-col">
-      <div
-        className={`flex ${
-          embedLevel >= 2 ? "py-1" : "py-2"
-        } px-2 rounded-md cursor-pointer items-center ${
-          folderOpen && "bg-neutral-100"
-        }`}
-        onClick={() => setFolderOpen((prev) => !prev)}
+      <EditEntityPopover
+        deleteId={id}
+        isFolder={true}
+        open={editPopoverOpen}
+        onOpenChange={setEditPopoverOpen}
+        setEditingActive={setEditingActive}
       >
-        {editMode ? (
-          <AddEntityPopover
-            embedLevel={embedLevel}
-            folderId={id}
-            open={popoverOpen}
-            onOpenChange={setPopoverOpen}
-            className="border-neutral-200 p-1 flex items-center justify-center border size-6 rounded-full"
+        <div
+          onContextMenu={handleContextMenu}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          className={`flex ${
+            embedLevel >= 2 ? "py-1" : "py-2"
+          } px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors ${
+            folderOpen && "bg-gray-50"
+          }`}
+        >
+          <div
+            className={`${embedLevel >= 2 ? "p-1.5" : "p-2"} ${
+              folderOpen ? "shadow-blue-300 shadow-sm" : "shadow"
+            } border-gray-100 border rounded-lg relative group`}
           >
-            <PlusIcon className="size-4" />
-          </AddEntityPopover>
-        ) : (
-          <FolderIcon
-            className={`${
-              embedLevel >= 2
-                ? "size-5 min-h-5 min-w-5"
-                : "size-6 min-h-6 min-w-6"
-            }`}
-          />
-        )}
-        {isMatchingId ? (
-          <EntryInput defaultValue={title} />
-        ) : (
-          <p
-            className={`${
-              embedLevel >= 2 && "text-sm"
-            } font-semibold ml-4 font-sans text-neutral-800 whitespace-nowrap overflow-hidden text-ellipsis`}
-          >
-            {title}
-          </p>
-        )}
+            <AddEntityPopover
+              setFolderOpen={setFolderOpen}
+              embedLevel={embedLevel}
+              folderId={id}
+              open={addPopoverOpen}
+              onOpenChange={setAddPopoverOpen}
+              setAddingEntry={setAddingEntry}
+              className={` ${
+                addPopoverOpen ? "scale-100" : "scale-0"
+              } group-hover:scale-100 transition-transform absolute z-50 inset-0 size-full p-1 flex items-center justify-center`}
+            >
+              <PlusIcon className="size-4" />
+            </AddEntityPopover>
+            <FolderIcon
+              className={`${
+                embedLevel >= 2 ? "size-3 min-w-3" : "size-4 min-w-4"
+              } ${
+                addPopoverOpen ? "scale-0" : "scale-100"
+              } group-hover:scale-0 transition-transform`}
+            />
+          </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <ArrowIcon
-            className={`size-6 transition-transform duration-300 ${
-              folderOpen && "rotate-90"
-            }`}
-          />
-          {editMode && (
-            <>
-              <button onClick={(e) => handleClick(e)}>
-                <EditIcon className="text-gray-400 size-5" />
-              </button>
-              <AreYouSureDialog entryId={id}>
-                <BinIcon className="text-red-400 size-5" />
-              </AreYouSureDialog>
-            </>
+          {editingActive ? (
+            <EntryInput
+              defaultValue={title}
+              mode="edit"
+              mutateId={id}
+              addingEntry="folder"
+              setEditingActive={setEditingActive}
+            />
+          ) : (
+            <p
+              className={`${embedLevel >= 2 && "text-sm"} ${
+                folderOpen ? "text-blue-400" : "text-neutral-600"
+              } font-semibold text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis`}
+            >
+              {title}
+            </p>
           )}
+
+          <div className="ml-auto flex items-center gap-2">
+            <ArrowIcon
+              className={`size-6 transition-transform duration-300 ${
+                folderOpen && "rotate-90"
+              }`}
+            />
+          </div>
         </div>
-      </div>
-      {/* {open && (!!categories.length || addFolder) && (
+      </EditEntityPopover>
+      {folderOpen && (!!entries.length || addingEntry) && (
         <div className="flex py-1 pr-2">
           <Separator orientation="vertical" className="ml-2" />
-          <ul className="flex flex-col pl-2 w-full gap-0.5">
-            {addFolder && (
+          <ul className="flex flex-col pl-4 w-full gap-0.5">
+            {addingEntry && (
               <li>
-                <GalleryInput
-                  addFolder={addFolder}
-                  setAddFolder={setAddFolder}
-                  setGalleryItems={setCategories}
+                <EntryInput
+                  addingEntry={addingEntry}
+                  mode="add"
+                  mutateId={id}
+                  setAddingEntry={setAddingEntry}
                 />
               </li>
             )}
-            {categories.map((data) =>
-              !data.subcategories ? (
-                <GalleryItem
-                  id={data.id}
-                  key={data.id}
+            {entries.map((entry) =>
+              entry.isFolder ? (
+                <EntryFolder
+                  key={entry.id}
+                  id={entry.id}
+                  parentId={id}
                   embedLevel={embedLevel + 1}
-                  setParentCategories={setCategories}
-                  title={data.title}
+                  title={entry.title}
                 />
               ) : (
-                <GalleryFolder
-                  id={data.id}
+                <EntryLink
+                  key={entry.id}
                   embedLevel={embedLevel + 1}
-                  setParentCategories={setCategories}
-                  key={data.id}
-                  title={data.title}
-                  subcategories={data.subcategories}
+                  title={entry.title}
+                  id={entry.id}
                 />
               )
             )}
           </ul>
         </div>
-      )} */}
+      )}
     </li>
   );
 };
