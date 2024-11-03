@@ -12,6 +12,7 @@ import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
 
 const useGetEntries = (queryPath: QueryPath) => {
+  const rootId = queryPath[1];
   return useQuery<Entry[], Error>({
     queryKey: queryPath,
     queryFn: async () => {
@@ -24,6 +25,7 @@ const useGetEntries = (queryPath: QueryPath) => {
       );
       return sortEntries(data.getEntries);
     },
+    enabled: rootId !== undefined,
   });
 };
 

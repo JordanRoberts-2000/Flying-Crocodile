@@ -7,13 +7,15 @@ import { Separator } from "@/components/ui/separator";
 import useGetRootEntries from "../hooks/useGetRootEntry";
 import { AddingEntry } from "../entryTypes";
 import PlusIcon from "../../../assets/svgs/add.svg?react";
+import useGetEntries from "../hooks/useGetEntries";
 
 const Entries = ({}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { data, isLoading, isSuccess } = useGetRootEntries("gallery");
+  const { data: rootId, isLoading, isSuccess } = useGetRootEntries("gallery");
+  const { data: entries } = useGetEntries(["gallery", rootId]);
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
-  const rootId = data?.rootId ?? 1;
-  if (isLoading || !isSuccess) return;
+
+  if (isLoading || !isSuccess || !entries) return;
   return (
     <div className="px-2 pl-4 flex-1 flex flex-col">
       <AddEntityPopover
@@ -36,7 +38,7 @@ const Entries = ({}) => {
             mutateId={rootId}
           />
         )}
-        {data.entries.map((entry) =>
+        {entries.map((entry) =>
           entry.isFolder ? (
             <EntryFolder
               key={entry.id}

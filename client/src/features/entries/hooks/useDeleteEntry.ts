@@ -1,4 +1,3 @@
-// src/features/entries/hooks/useDeleteEntry.ts
 import request from "graphql-request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteEntry } from "@/features/entries/api/entryQueries";
@@ -11,7 +10,6 @@ const useDeleteEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (queryPath: QueryPath) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       return request(API_BASE_URL, deleteEntry, {
         entryId: getEntryId(queryPath),
       });
