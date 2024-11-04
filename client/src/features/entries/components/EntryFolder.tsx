@@ -11,6 +11,7 @@ import EditEntityPopover from "./popovers/EditEntryPopover";
 import { AddingEntry, QueryPath } from "../entryTypes";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
 import getEntryId from "../utils/getId";
+import useErrorNotification from "../hooks/useErrorNotification";
 
 type Props = {
   title: string;
@@ -30,6 +31,11 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
 
   const entryId = getEntryId(queryPath);
   const isOptimisticEntry = entryId === -1;
+
+  useErrorNotification(
+    error,
+    `Error getting entries from id: "${[queryPath]}"`
+  );
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {

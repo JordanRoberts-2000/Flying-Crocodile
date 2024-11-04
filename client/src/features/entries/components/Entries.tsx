@@ -8,12 +8,31 @@ import useGetRootEntries from "../hooks/useGetRootEntry";
 import { AddingEntry } from "../entryTypes";
 import PlusIcon from "../../../assets/svgs/add.svg?react";
 import useGetEntries from "../hooks/useGetEntries";
+import useErrorNotification from "../hooks/useErrorNotification";
+
+const TEMP_ROOT_NAME = "gallery";
 
 const Entries = ({}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { data: rootId, isLoading, error } = useGetRootEntries("gallery");
-  const { data: entries } = useGetEntries(["gallery", rootId]);
+  const {
+    data: rootId,
+    isLoading,
+    error: rootErr,
+  } = useGetRootEntries(TEMP_ROOT_NAME);
+  const { data: entries, error: entryErr } = useGetEntries([
+    TEMP_ROOT_NAME,
+    rootId,
+  ]);
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
+
+  useErrorNotification(
+    rootErr,
+    `Error getting root folder: "${TEMP_ROOT_NAME}"`
+  );
+  useErrorNotification(
+    entryErr,
+    `Error getting entries from id: "${[TEMP_ROOT_NAME, rootId]}"`
+  );
 
   if (isLoading)
     return (
@@ -21,7 +40,7 @@ const Entries = ({}) => {
         <div className="size-10 border-l-0 border-2 rounded-full border-gray-700 animate-spin" />
       </div>
     );
-  if (error) return <div>Error Tap to retry</div>;
+  if (rootErr || entryErr) return <div>Error Tap to retry</div>;
   if (!entries) return;
   return (
     <div className="px-2 pl-4 flex-1 flex flex-col">
@@ -43,7 +62,7 @@ const Entries = ({}) => {
             setAddingEntry={setAddingEntry}
             addingEntry={addingEntry}
             mode="add"
-            queryPath={["gallery", rootId]}
+            queryPath={[TEMP_ROOT_NAME, rootId]}
           />
         )}
         {entries.map((entry) =>
@@ -52,14 +71,14 @@ const Entries = ({}) => {
               key={entry.id}
               embedLevel={1}
               title={entry.title}
-              queryPath={["gallery", rootId, entry.id]}
+              queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
             />
           ) : (
             <EntryLink
               key={entry.id}
               embedLevel={1}
               title={entry.title}
-              queryPath={["gallery", rootId, entry.id]}
+              queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
             />
           )
         )}

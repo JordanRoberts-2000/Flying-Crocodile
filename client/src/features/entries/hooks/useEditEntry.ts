@@ -6,6 +6,7 @@ import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
 import { Entry } from "@/gql/graphql";
 import sortEntries from "../utils/sortEntries";
+import { toast } from "sonner";
 
 type MutationVariables = {
   queryPath: QueryPath;
@@ -45,20 +46,17 @@ const useUpdateEntry = () => {
       }
       return { previousEntries };
     },
-    onError: (error, { queryPath }, context) => {
-      console.log(error);
-      // toast({
-      //   title: "Edit Failed",
-      //   description: error instanceof Error ? error.message : "An unknown error occurred",
-      //   status: "error",
-      // });
-
+    onError: (_error, { queryPath }, context) => {
+      toast.error("Entry edit failed");
       if (context?.previousEntries) {
         queryClient.setQueryData(
           queryPath.slice(0, -1),
           context.previousEntries
         );
       }
+    },
+    onSuccess: () => {
+      toast.success("Entry edited successfully");
     },
     onSettled: (_data, _error, { queryPath }) => {
       queryClient.invalidateQueries({ queryKey: queryPath.slice(0, -1) });

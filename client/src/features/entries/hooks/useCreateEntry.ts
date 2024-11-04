@@ -5,6 +5,7 @@ import { createEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
 import { AddingEntry, QueryPath } from "../entryTypes";
 import sortEntries from "../utils/sortEntries";
+import { toast } from "sonner";
 
 type Variables = {
   newEntry: NewEntry;
@@ -30,17 +31,14 @@ const useCreateEntry = () => {
       }
       return { previousEntries };
     },
-    onError: (error, { queryPath }, context) => {
-      console.log(error);
-      // toast({
-      //   title: "Deletion Failed",
-      //   description: error instanceof Error ? error.message : "An unknown error occurred",
-      //   status: "error",
-      // });
-
+    onError: (_error, { queryPath }, context) => {
+      toast.error("Entry creation failed");
       if (context?.previousEntries) {
         queryClient.setQueryData(queryPath, context.previousEntries);
       }
+    },
+    onSuccess: () => {
+      toast.success("Entry created successfully");
     },
     onSettled: (_data, _error, { queryPath }) => {
       queryClient.invalidateQueries({ queryKey: queryPath });

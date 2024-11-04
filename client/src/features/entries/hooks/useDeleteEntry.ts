@@ -5,6 +5,7 @@ import { API_BASE_URL } from "@/constants";
 import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
 import { Entry } from "@/gql/graphql";
+import { toast } from "sonner";
 
 const useDeleteEntry = () => {
   const queryClient = useQueryClient();
@@ -28,14 +29,8 @@ const useDeleteEntry = () => {
       }
       return { previousEntries };
     },
-    onError: (error, queryPath, context) => {
-      console.log(error);
-      // toast({
-      //   title: "Deletion Failed",
-      //   description: error instanceof Error ? error.message : "An unknown error occurred",
-      //   status: "error",
-      // });
-
+    onError: (_error, queryPath, context) => {
+      toast.error("Entry deletion failed");
       if (context?.previousEntries) {
         queryClient.setQueryData(
           queryPath.slice(0, -1),
@@ -44,6 +39,7 @@ const useDeleteEntry = () => {
       }
     },
     onSuccess: (_newData, queryPath) => {
+      toast.success("Entry deleted successfully");
       queryClient.removeQueries({ queryKey: queryPath });
     },
     onSettled: (_data, _error, queryPath) => {
