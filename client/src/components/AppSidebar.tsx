@@ -1,6 +1,6 @@
 import { SheetContent, SheetFooter, SheetTitle } from "./ui/sheet";
-import UserIcon from "../assets/svgs/user.svg?react";
-import Entries from "../features/entries/components/Entries";
+import Entries from "../features/entries/components/rootEntries/Entries";
+import Icon from "./Icon";
 
 const AppSidebar = () => {
   return (
@@ -8,7 +8,7 @@ const AppSidebar = () => {
       <SheetTitle className="hidden">hello</SheetTitle>
       <div className="flex gap-4 items-center p-2 bg-neutral-100">
         <div className="bg-green-50 p-1 rounded-md shadow">
-          <UserIcon className="size-6 text-green-700" />
+          <Icon name="user" className="size-6 text-green-700" />
         </div>
         <p className="text-sm">Jordanroberts333@icloud.com</p>
       </div>

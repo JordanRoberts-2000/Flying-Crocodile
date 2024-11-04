@@ -1,10 +1,9 @@
 import { useRef } from "react";
-import FolderIcon from "../../../assets/svgs/folderPlus.svg?react";
-import ImageIcon from "../../../assets/svgs/photo.svg?react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
 import { AddingEntry, QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
+import Icon from "@/components/Icon";
 
 type Props = {
   addingEntry: Exclude<AddingEntry, false>;
@@ -53,9 +52,15 @@ const EntryInput = ({
     <form onSubmit={(e) => handleSubmit(e)} className="w-full relative">
       {mode === "add" &&
         (addingEntry === "folder" ? (
-          <FolderIcon className="size-4 min-w-4 absolute left-4 top-1/2 -translate-y-1/2" />
+          <Icon
+            name="folderPlus"
+            className="absolute left-4 top-1/2 -translate-y-1/2"
+          />
         ) : (
-          <ImageIcon className="size-4 min-w-4 absolute left-4 top-1/2 -translate-y-1/2" />
+          <Icon
+            name="photo"
+            className="absolute left-4 top-1/2 -translate-y-1/2"
+          />
         ))}
 
       <input

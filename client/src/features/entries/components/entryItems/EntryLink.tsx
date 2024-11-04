@@ -1,10 +1,10 @@
-import ImageIcon from "../../../assets/svgs/photo.svg?react";
-import EntryInput from "./EntryInput";
+import EntryInput from "../EntryInput";
 import { useRef, useState } from "react";
-import EditEntityPopover from "./popovers/EditEntryPopover";
+import EditEntityPopover from "../popovers/EditEntryPopover";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
-import { QueryPath } from "../entryTypes";
-import getEntryId from "../utils/getId";
+import { QueryPath } from "../../entryTypes";
+import getEntryId from "../../utils/getId";
+import Icon from "@/components/Icon";
 
 type Props = {
   queryPath: QueryPath;
@@ -57,14 +57,17 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
         onMouseUp={handleMouseUp}
         className={`${
           isOptimisticEntry && "hover:opacity-15 pointer-events-none"
-        } flex items-center py-2 px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer`}
+        } flex items-center ${
+          embedLevel >= 2 ? " py-1" : " py-2"
+        } px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer ${
+          editPopoverOpen && "outline outline-2 outline-blue-300"
+        }`}
       >
         <div className={`${embedLevel >= 2 ? " p-1" : " p-1.5"}`}>
-          <ImageIcon
+          <Icon
+            name="photo"
             strokeWidth={2}
-            className={`${
-              embedLevel >= 2 ? "size-5 min-w-5" : "size-6 min-w-6"
-            }`}
+            className={`${embedLevel >= 2 ? "size-5" : "size-6"}`}
           />
         </div>
         {editingActive ? (
@@ -80,7 +83,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
           <p
             className={`${
               embedLevel >= 2 && ""
-            } font-semibold ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis`}
+            } font-semibold select-none ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis`}
           >
             {title}
           </p>

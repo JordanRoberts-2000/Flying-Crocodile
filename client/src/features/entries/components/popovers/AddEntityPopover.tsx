@@ -5,9 +5,7 @@ import {
 } from "@/components/ui/popover";
 import { AddingEntry } from "../../entryTypes";
 import { EMBEDDED_FOLDER_LIMIT } from "@/constants";
-import PhotoIcon from "../../../../assets/svgs/photo.svg?react";
-import FolderIcon from "../../../../assets/svgs/folderPlus.svg?react";
-
+import Icon from "@/components/Icon";
 type Props = {
   folderId: number;
   open: boolean;
@@ -60,14 +58,14 @@ const AddEntityPopover = ({
           onClick={(e) => handleClick(e, "folder")}
           className="text-left py-2 px-4 text-sm text-neutral-600 font-semibold hover:text-blue-600 hover:bg-blue-50 border-gray-200 border rounded-md gap-4 flex items-center"
         >
-          <FolderIcon className="size-5 min-w-5 fill-white" strokeWidth={2} />
+          <Icon name="folder" className="fill-white" strokeWidth={2} />
           {`New ${isRoot ? "root " : ""}folder`}
         </button>
         <button
           onClick={(e) => handleClick(e, "link")}
           className="text-left py-2 px-4 text-sm text-neutral-600 font-semibold hover:text-blue-600 hover:bg-blue-50 border-gray-200 border rounded-md gap-4 flex items-center"
         >
-          <PhotoIcon className="size-5 min-w-5 fill-white" strokeWidth={2} />{" "}
+          <Icon name="photo" className="fill-white" strokeWidth={2} />
           {`New ${isRoot ? "root " : ""}gallery`}
         </button>
       </PopoverContent>

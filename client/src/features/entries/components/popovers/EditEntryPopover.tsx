@@ -1,10 +1,9 @@
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverAnchor } from "@radix-ui/react-popover";
-import EditIcon from "../../../../assets/svgs/edit.svg?react";
-import BinIcon from "../../../../assets/svgs/bin.svg?react";
-import AreYouSureDialog from "../areYouSureDialog";
+import AreYouSureDialog from "../AreYouSureDialog";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { QueryPath } from "../../entryTypes";
+import Icon from "@/components/Icon";
 
 type Props = {
   open: boolean;
@@ -43,7 +42,7 @@ const EditEntityPopover = ({
               onClick={(e) => handleEdit(e)}
               className="text-left py-2 px-4 text-sm text-neutral-600 font-semibold hover:text-blue-600 hover:bg-blue-50 border-gray-200 border rounded-md gap-4 flex items-center"
             >
-              <EditIcon className="size-5 min-w-5" strokeWidth={2} />
+              <Icon name="edit" strokeWidth={2} />
               {`Edit ${isFolder ? "folder" : "link"}`}
             </button>
             <DialogTrigger asChild>
@@ -51,10 +50,7 @@ const EditEntityPopover = ({
                 onClick={(e) => e.stopPropagation()}
                 className="text-left py-2 px-4 text-sm text-neutral-600 font-semibold hover:text-blue-600 hover:bg-blue-50 border-gray-200 border rounded-md gap-4 flex items-center"
               >
-                <BinIcon
-                  className="size-5 min-w-5 fill-white"
-                  strokeWidth={2}
-                />
+                <Icon name="bin" className="fill-white" strokeWidth={2} />
                 {`Delete ${isFolder ? "folder" : "link"}`}
               </button>
             </DialogTrigger>

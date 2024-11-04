@@ -1,17 +1,15 @@
 import { useRef, useState } from "react";
-import ArrowIcon from "../../../assets/svgs/arrow.svg?react";
-import FolderIcon from "../../../assets/svgs/folder.svg?react";
-import PlusIcon from "../../../assets/svgs/add.svg?react";
-import AddEntityPopover from "./popovers/AddEntityPopover";
-import EntryInput from "./EntryInput";
-import useGetEntries from "../hooks/useGetEntries";
+import AddEntityPopover from "../popovers/AddEntityPopover";
+import EntryInput from "../EntryInput";
+import useGetEntries from "../../hooks/useGetEntries";
 import { Separator } from "@/components/ui/separator";
 import EntryLink from "./EntryLink";
-import EditEntityPopover from "./popovers/EditEntryPopover";
-import { AddingEntry, QueryPath } from "../entryTypes";
+import EditEntityPopover from "../popovers/EditEntryPopover";
+import { AddingEntry, QueryPath } from "../../entryTypes";
 import { HOLD_TO_TRIGGER_MS } from "@/constants";
-import getEntryId from "../utils/getId";
-import useErrorNotification from "../hooks/useErrorNotification";
+import getEntryId from "../../utils/getId";
+import useErrorNotification from "../../hooks/useErrorNotification";
+import Icon from "@/components/Icon";
 
 type Props = {
   title: string;
@@ -27,15 +25,15 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
-  const { data: entries = [], isLoading, error } = useGetEntries(queryPath);
+
+  const { data: entries, isError, isPending } = useGetEntries(queryPath);
+  useErrorNotification(
+    isError,
+    `Error getting entries from id: "${[queryPath]}"`
+  );
 
   const entryId = getEntryId(queryPath);
   const isOptimisticEntry = entryId === -1;
-
-  useErrorNotification(
-    error,
-    `Error getting entries from id: "${[queryPath]}"`
-  );
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -63,6 +61,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
     setEditPopoverOpen(true);
   };
 
+  if (isPending || isError) return;
   return (
     <li
       className={`${
@@ -84,6 +83,9 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
             embedLevel >= 2 ? "py-1" : "py-2"
           } px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors ${
             folderOpen && "bg-gray-50"
+          } ${
+            (addPopoverOpen || editPopoverOpen) &&
+            "outline outline-2 outline-blue-300"
           }`}
         >
           <div
@@ -102,12 +104,11 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
                 addPopoverOpen ? "scale-100" : "scale-0"
               } group-hover:scale-100 transition-transform absolute z-50 inset-0 size-full p-1 flex items-center justify-center`}
             >
-              <PlusIcon className="size-4" />
+              <Icon name="plus" className="size-4" />
             </AddEntityPopover>
-            <FolderIcon
-              className={`${
-                embedLevel >= 2 ? "size-3 min-w-3" : "size-4 min-w-4"
-              } ${
+            <Icon
+              name="folder"
+              className={`${embedLevel >= 2 ? "size-3" : "size-4"} ${
                 addPopoverOpen ? "scale-0" : "scale-100"
               } group-hover:scale-0 transition-transform`}
             />
@@ -126,14 +127,15 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
             <p
               className={`${embedLevel >= 2 && "text-sm"} ${
                 folderOpen ? "text-blue-400" : "text-neutral-600"
-              } font-semibold text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis`}
+              } font-semibold select-none text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis`}
             >
               {title}
             </p>
           )}
 
           <div className="ml-auto flex items-center gap-2">
-            <ArrowIcon
+            <Icon
+              name="arrow"
               className={`size-6 transition-transform duration-300 ${
                 folderOpen && "rotate-90"
               }`}
@@ -141,15 +143,15 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           </div>
         </div>
       </EditEntityPopover>
-      {folderOpen && error && <div>Error Tap to retry</div>}
-      {folderOpen && isLoading && (
+      {folderOpen && isError && <div>Error Tap to retry</div>}
+      {folderOpen && isPending && (
         <div className="w-full p-3 bg-gray-50 animate-pulse flex items-center justify-center">
           <div className="size-6 border-l-0 border-2 rounded-full border-gray-700 animate-spin" />
         </div>
       )}
       {folderOpen &&
-        !isLoading &&
-        !error &&
+        !isPending &&
+        !isError &&
         (!!entries.length || addingEntry) && (
           <div className="flex py-1 pr-2">
             <Separator orientation="vertical" className="ml-2" />
