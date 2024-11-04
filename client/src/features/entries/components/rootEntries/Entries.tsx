@@ -10,6 +10,7 @@ import EntriesEmpty from "./Entries.empty";
 import Icon from "@/components/Icon";
 import EntryFolder from "../entryItems/EntryFolder";
 import EntryLink from "../entryItems/EntryLink";
+import clsx from "clsx";
 
 const TEMP_ROOT_NAME = "gallery";
 
@@ -24,7 +25,7 @@ const Entries = () => {
   if (isError) return <EntriesError />;
 
   return (
-    <div className="px-2 pl-4 flex-1 flex flex-col">
+    <>
       <AddEntityPopover
         open={popoverOpen}
         isRoot={true}
@@ -32,48 +33,52 @@ const Entries = () => {
         embedLevel={1}
         folderId={rootId}
         setAddingEntry={setAddingEntry}
-        className={`pt-2 pb-1 hover:text-blue-600 w-fit ${
-          popoverOpen && "text-blue-600"
-        }`}
+        className={clsx(
+          popoverOpen && "text-blue-600",
+          "p-3 hover:text-blue-600 w-fit"
+        )}
       >
         <Icon name="plus" strokeWidth={2} />
       </AddEntityPopover>
-      {!!!entries.length ? (
-        <EntriesEmpty />
-      ) : (
-        <ul className="flex flex-col flex-1 gap-0.5">
-          {addingEntry && (
-            <li>
-              <EntryInput
-                embedLevel={1}
-                setAddingEntry={setAddingEntry}
-                addingEntry={addingEntry}
-                mode="add"
-                queryPath={[TEMP_ROOT_NAME, rootId]}
-              />
-            </li>
-          )}
-          {entries.map((entry) =>
-            entry.isFolder ? (
-              <EntryFolder
-                key={entry.id}
-                embedLevel={1}
-                title={entry.title}
-                queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
-              />
-            ) : (
-              <EntryLink
-                key={entry.id}
-                embedLevel={1}
-                title={entry.title}
-                queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
-              />
-            )
-          )}
-        </ul>
-      )}
-      <Separator />
-    </div>
+
+      <div className="px-2 pl-4 flex-1 flex flex-col overflow-y-auto">
+        {!!!entries.length ? (
+          <EntriesEmpty />
+        ) : (
+          <ul className="flex flex-col flex-1 gap-0.5">
+            {addingEntry && (
+              <li>
+                <EntryInput
+                  embedLevel={1}
+                  setAddingEntry={setAddingEntry}
+                  addingEntry={addingEntry}
+                  mode="add"
+                  queryPath={[TEMP_ROOT_NAME, rootId]}
+                />
+              </li>
+            )}
+            {entries.map((entry) =>
+              entry.isFolder ? (
+                <EntryFolder
+                  key={entry.id}
+                  embedLevel={1}
+                  title={entry.title}
+                  queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
+                />
+              ) : (
+                <EntryLink
+                  key={entry.id}
+                  embedLevel={1}
+                  title={entry.title}
+                  queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
+                />
+              )
+            )}
+          </ul>
+        )}
+        <Separator />
+      </div>
+    </>
   );
 };
 

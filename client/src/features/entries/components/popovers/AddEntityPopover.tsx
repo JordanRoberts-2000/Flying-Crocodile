@@ -6,6 +6,7 @@ import {
 import { AddingEntry } from "../../entryTypes";
 import { EMBEDDED_FOLDER_LIMIT } from "@/constants";
 import Icon from "@/components/Icon";
+import { PopoverAnchor } from "@radix-ui/react-popover";
 type Props = {
   folderId: number;
   open: boolean;
@@ -32,6 +33,7 @@ const AddEntityPopover = ({
     e.stopPropagation();
     setAddingEntry(entryType);
     onOpenChange(false);
+    console.log("triggered 2");
     if (setFolderOpen) setFolderOpen(true);
   };
 
@@ -43,6 +45,7 @@ const AddEntityPopover = ({
     );
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
+      {/* <PopoverAnchor virtualRef={} /> */}
       <PopoverTrigger
         onMouseDown={(e) => e.stopPropagation()}
         onMouseUp={(e) => e.stopPropagation()}

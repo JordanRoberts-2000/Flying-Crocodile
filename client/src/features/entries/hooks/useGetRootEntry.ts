@@ -28,10 +28,6 @@ const useGetRootEntries = (title: string): RootEntriesData => {
   } = useGetEntries([title, rootId]);
 
   useErrorNotification(rootErr, `Error getting root folder: "${title}"`);
-  useErrorNotification(
-    entriesErr,
-    `Error getting entries from id: "${[title, rootId]}"`
-  );
 
   const isPending = rootPending || entriesPending;
   const isError = rootErr || entriesErr;

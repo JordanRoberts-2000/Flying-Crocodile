@@ -10,10 +10,11 @@ import sortEntries from "../utils/sortEntries";
 import { API_BASE_URL } from "@/constants";
 import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
+import useErrorNotification from "./useErrorNotification";
 
 const useGetEntries = (queryPath: QueryPath) => {
   const rootId = queryPath[1];
-  return useQuery<Entry[], Error>({
+  const res = useQuery<Entry[], Error>({
     queryKey: queryPath,
     queryFn: async () => {
       const data = await request<GetEntriesQuery, GetEntriesQueryVariables>(
@@ -27,6 +28,13 @@ const useGetEntries = (queryPath: QueryPath) => {
     },
     enabled: rootId !== undefined && getEntryId(queryPath) !== -1,
   });
+
+  useErrorNotification(
+    res.isError,
+    `Error getting entries from id: "${[queryPath]}"`
+  );
+
+  return res;
 };
 
 export default useGetEntries;

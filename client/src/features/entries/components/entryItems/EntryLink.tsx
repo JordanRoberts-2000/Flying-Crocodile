@@ -1,10 +1,11 @@
 import EntryInput from "../EntryInput";
-import { useRef, useState } from "react";
-import EditEntityPopover from "../popovers/EditEntryPopover";
-import { HOLD_TO_TRIGGER_MS } from "@/constants";
+import { useState } from "react";
+import clsx from "clsx";
 import { QueryPath } from "../../entryTypes";
 import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
+import useLongPress from "@/hooks/useLongPress";
+import EditEntityPopover from "../popovers/EditEntryPopover";
 
 type Props = {
   queryPath: QueryPath;
@@ -14,29 +15,14 @@ type Props = {
 
 const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
   const [editPopoverOpen, setEditPopoverOpen] = useState(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongPress = useRef(false);
   const [editingActive, setEditingActive] = useState(false);
+
+  const { registerMouseDown, registerMouseUp } = useLongPress(() =>
+    setEditPopoverOpen(true)
+  );
 
   const entryId = getEntryId(queryPath);
   const isOptimisticEntry = entryId === -1;
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) {
-      isLongPress.current = false;
-      longPressTimer.current = setTimeout(() => {
-        isLongPress.current = true;
-        setEditPopoverOpen(true);
-      }, HOLD_TO_TRIGGER_MS);
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,21 +39,23 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
     >
       <li
         onContextMenu={handleContextMenu}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        className={`${
-          isOptimisticEntry && "hover:opacity-15 pointer-events-none"
-        } flex items-center ${
-          embedLevel >= 2 ? " py-1" : " py-2"
-        } px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer ${
+        onMouseDown={registerMouseDown}
+        onMouseUp={registerMouseUp}
+        style={{
+          ...(embedLevel < 2 ? { viewTransitionName: `entry-${entryId}` } : {}),
+        }}
+        className={clsx(
+          "flex items-center px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer",
+          isOptimisticEntry && "hover:opacity-15 pointer-events-none",
+          embedLevel >= 2 ? "py-1" : "py-2",
           editPopoverOpen && "outline outline-2 outline-blue-300"
-        }`}
+        )}
       >
-        <div className={`${embedLevel >= 2 ? " p-1" : " p-1.5"}`}>
+        <div className={clsx(embedLevel >= 2 ? "p-1" : "p-1.5")}>
           <Icon
             name="photo"
             strokeWidth={2}
-            className={`${embedLevel >= 2 ? "size-5" : "size-6"}`}
+            className={clsx(embedLevel >= 2 ? "size-5" : "size-6")}
           />
         </div>
         {editingActive ? (
@@ -81,9 +69,10 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
           />
         ) : (
           <p
-            className={`${
-              embedLevel >= 2 && ""
-            } font-semibold select-none ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis`}
+            className={clsx(
+              "font-semibold select-none ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis",
+              embedLevel >= 2 && "text-sm"
+            )}
           >
             {title}
           </p>

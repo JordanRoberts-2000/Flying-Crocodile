@@ -1,15 +1,14 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
+import clsx from "clsx";
 import AddEntityPopover from "../popovers/AddEntityPopover";
 import EntryInput from "../EntryInput";
-import useGetEntries from "../../hooks/useGetEntries";
-import { Separator } from "@/components/ui/separator";
-import EntryLink from "./EntryLink";
-import EditEntityPopover from "../popovers/EditEntryPopover";
 import { AddingEntry, QueryPath } from "../../entryTypes";
-import { HOLD_TO_TRIGGER_MS } from "@/constants";
 import getEntryId from "../../utils/getId";
-import useErrorNotification from "../../hooks/useErrorNotification";
 import Icon from "@/components/Icon";
+import useLongPress from "@/hooks/useLongPress";
+import FolderContent from "./folderContent/FolderContent";
+import EditEntityPopover from "../popovers/EditEntryPopover";
+import viewTransition from "@/utils/viewTransition";
 
 type Props = {
   title: string;
@@ -23,50 +22,37 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const [folderOpen, setFolderOpen] = useState(false);
   const [editingActive, setEditingActive] = useState(false);
   const [addingEntry, setAddingEntry] = useState<AddingEntry>(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongPress = useRef(false);
 
-  const { data: entries, isError, isPending } = useGetEntries(queryPath);
-  useErrorNotification(
-    isError,
-    `Error getting entries from id: "${[queryPath]}"`
+  const { registerMouseDown, registerMouseUp, isLongPress } = useLongPress(() =>
+    setEditPopoverOpen(true)
   );
 
   const entryId = getEntryId(queryPath);
   const isOptimisticEntry = entryId === -1;
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) {
-      isLongPress.current = false;
-      longPressTimer.current = setTimeout(() => {
-        isLongPress.current = true;
-        setEditPopoverOpen(true);
-      }, HOLD_TO_TRIGGER_MS);
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-
-    if (e.button === 0 && !isLongPress.current) {
-      setFolderOpen((prev) => !prev);
-    }
-  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setEditPopoverOpen(true);
   };
 
-  if (isPending || isError) return;
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    console.log("triggered");
+    registerMouseUp();
+    if (!isLongPress.current) {
+      viewTransition(() => setFolderOpen((prev) => !prev));
+    }
+  };
+
   return (
     <li
-      className={`${
+      // style={{
+      //   ...(embedLevel < 2 ? { viewTransitionName: `entry-${entryId}` } : {}),
+      // }}
+      className={clsx(
+        "flex flex-col",
         isOptimisticEntry && "pointer-events-none hover:opacity-15"
-      } flex flex-col`}
+      )}
     >
       <EditEntityPopover
         queryPath={queryPath}
@@ -77,21 +63,22 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
       >
         <div
           onContextMenu={handleContextMenu}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          className={`flex ${
-            embedLevel >= 2 ? "py-1" : "py-2"
-          } px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors ${
-            folderOpen && "bg-gray-50"
-          } ${
+          onMouseDown={registerMouseDown}
+          onMouseUp={(e) => handleMouseUp(e)}
+          className={clsx(
+            "flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
+            embedLevel >= 2 ? "py-1" : "py-2",
+            folderOpen && "bg-gray-50",
             (addPopoverOpen || editPopoverOpen) &&
-            "outline outline-2 outline-blue-300"
-          }`}
+              "outline outline-2 outline-blue-300"
+          )}
         >
           <div
-            className={`${embedLevel >= 2 ? "p-1.5" : "p-2"} ${
+            className={clsx(
+              "outline-gray-100 outline outline-1 rounded-lg relative group",
+              embedLevel >= 2 ? "p-1.5" : "p-2",
               folderOpen ? "shadow-blue-300 shadow-sm" : "shadow"
-            } border-gray-100 border rounded-lg relative group`}
+            )}
           >
             <AddEntityPopover
               setFolderOpen={setFolderOpen}
@@ -100,17 +87,20 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
               open={addPopoverOpen}
               onOpenChange={setAddPopoverOpen}
               setAddingEntry={setAddingEntry}
-              className={` ${
+              className={clsx(
+                "group-hover:scale-100 transition-transform absolute z-50 inset-0 size-full p-1 flex items-center justify-center",
                 addPopoverOpen ? "scale-100" : "scale-0"
-              } group-hover:scale-100 transition-transform absolute z-50 inset-0 size-full p-1 flex items-center justify-center`}
+              )}
             >
               <Icon name="plus" className="size-4" />
             </AddEntityPopover>
             <Icon
               name="folder"
-              className={`${embedLevel >= 2 ? "size-3" : "size-4"} ${
-                addPopoverOpen ? "scale-0" : "scale-100"
-              } group-hover:scale-0 transition-transform`}
+              className={clsx(
+                embedLevel >= 2 ? "size-4" : "size-5",
+                addPopoverOpen ? "scale-0" : "scale-100",
+                "group-hover:scale-0 transition-transform"
+              )}
             />
           </div>
 
@@ -125,9 +115,11 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
             />
           ) : (
             <p
-              className={`${embedLevel >= 2 && "text-sm"} ${
+              className={clsx(
+                "font-semibold select-none text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis",
+                embedLevel >= 2 && "text-sm",
                 folderOpen ? "text-blue-400" : "text-neutral-600"
-              } font-semibold select-none text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis`}
+              )}
             >
               {title}
             </p>
@@ -136,57 +128,22 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           <div className="ml-auto flex items-center gap-2">
             <Icon
               name="arrow"
-              className={`size-6 transition-transform duration-300 ${
+              className={clsx(
+                "size-6 transition-transform duration-300",
                 folderOpen && "rotate-90"
-              }`}
+              )}
             />
           </div>
         </div>
       </EditEntityPopover>
-      {folderOpen && isError && <div>Error Tap to retry</div>}
-      {folderOpen && isPending && (
-        <div className="w-full p-3 bg-gray-50 animate-pulse flex items-center justify-center">
-          <div className="size-6 border-l-0 border-2 rounded-full border-gray-700 animate-spin" />
-        </div>
+      {folderOpen && (
+        <FolderContent
+          queryPath={queryPath}
+          embedLevel={embedLevel}
+          addingEntry={addingEntry}
+          setAddingEntry={setAddingEntry}
+        />
       )}
-      {folderOpen &&
-        !isPending &&
-        !isError &&
-        (!!entries.length || addingEntry) && (
-          <div className="flex py-1 pr-2">
-            <Separator orientation="vertical" className="ml-2" />
-            <ul className="flex flex-col pl-4 w-full gap-0.5">
-              {addingEntry && (
-                <li>
-                  <EntryInput
-                    embedLevel={embedLevel + 1}
-                    addingEntry={addingEntry}
-                    mode="add"
-                    queryPath={queryPath}
-                    setAddingEntry={setAddingEntry}
-                  />
-                </li>
-              )}
-              {entries.map((entry) =>
-                entry.isFolder ? (
-                  <EntryFolder
-                    key={entry.id}
-                    embedLevel={embedLevel + 1}
-                    title={entry.title}
-                    queryPath={[...queryPath, entry.id]}
-                  />
-                ) : (
-                  <EntryLink
-                    key={entry.id}
-                    embedLevel={embedLevel + 1}
-                    title={entry.title}
-                    queryPath={[...queryPath, entry.id]}
-                  />
-                )
-              )}
-            </ul>
-          </div>
-        )}
     </li>
   );
 };
