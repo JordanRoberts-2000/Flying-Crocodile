@@ -6,17 +6,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useDeleteEntry from "../hooks/useDeleteEntry";
-import { QueryPath } from "../entryTypes";
+import useEntryStore from "../store/useEntryStore";
 
-type Props = {
-  queryPath: QueryPath;
-};
-
-const AreYouSureDialog = ({ queryPath }: Props) => {
+const AreYouSureDialog = () => {
   const deleteEntry = useDeleteEntry();
+  const queryPath = useEntryStore((state) => state.modifyEntry.queryPath);
+
   const handleDeleteEntry = () => {
-    deleteEntry.mutate(queryPath);
+    if (queryPath) deleteEntry.mutate(queryPath);
   };
+
   return (
     <DialogContent>
       <DialogHeader>

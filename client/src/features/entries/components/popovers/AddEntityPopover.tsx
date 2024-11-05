@@ -1,58 +1,47 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { AddingEntry } from "../../entryTypes";
-import { EMBEDDED_FOLDER_LIMIT } from "@/constants";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 import Icon from "@/components/Icon";
 import { PopoverAnchor } from "@radix-ui/react-popover";
-type Props = {
-  folderId: number;
-  open: boolean;
-  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-  embedLevel: number;
-  setFolderOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  setAddingEntry: React.Dispatch<React.SetStateAction<AddingEntry>>;
-  isRoot?: boolean;
-  children: React.ReactNode;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+import { InputEntryType } from "../../entryTypes";
+import getEntryId from "../../utils/getId";
+import useEntryStore from "../../store/useEntryStore";
 
-const AddEntityPopover = ({
-  open,
-  onOpenChange,
-  folderId,
-  embedLevel,
-  children,
-  isRoot = false,
-  setFolderOpen,
-  setAddingEntry,
-  ...rest
-}: Props) => {
-  const handleClick = (e: React.MouseEvent, entryType: AddingEntry) => {
+type Props = {
+  rootId: number;
+};
+
+const AddEntityPopover = ({ rootId }: Props) => {
+  const open = useEntryStore((state) => state.modifyEntry.add.popoverOpen);
+  const setPopoverOpen = useEntryStore(
+    (state) => state.modifyEntry.actions.setPopoverOpen
+  );
+  const isRoot = useEntryStore(
+    (store) =>
+      store.modifyEntry.queryPath &&
+      getEntryId(store.modifyEntry.queryPath) === rootId
+  );
+  const setInputType = useEntryStore(
+    (state) => state.modifyEntry.actions.setInputType
+  );
+  const popoverAnchor = useEntryStore(
+    (state) => state.modifyEntry.add.popoverAnchorRef
+  );
+  const setInputActive = useEntryStore(
+    (store) => store.modifyEntry.actions.setInputActive
+  );
+
+  const handleClick = (e: React.MouseEvent, entryType: InputEntryType) => {
+    setInputType(entryType);
+    setInputActive("add", true);
+    setPopoverOpen("add", false);
     e.stopPropagation();
-    setAddingEntry(entryType);
-    onOpenChange(false);
-    console.log("triggered 2");
-    if (setFolderOpen) setFolderOpen(true);
   };
 
-  if (embedLevel > EMBEDDED_FOLDER_LIMIT)
-    return (
-      <button {...rest} onClick={(e) => handleClick(e, "link")}>
-        {children}
-      </button>
-    );
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      {/* <PopoverAnchor virtualRef={} /> */}
-      <PopoverTrigger
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseUp={(e) => e.stopPropagation()}
-        {...rest}
-      >
-        {children}
-      </PopoverTrigger>
+    <Popover
+      open={open}
+      onOpenChange={(isOpen) => setPopoverOpen("add", isOpen)}
+    >
+      <PopoverAnchor virtualRef={popoverAnchor} />
       <PopoverContent
         side="right"
         className="flex flex-col w-fit p-1 gap-1 ml-2"

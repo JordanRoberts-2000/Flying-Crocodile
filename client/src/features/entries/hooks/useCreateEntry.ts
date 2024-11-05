@@ -3,23 +3,27 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Entry, NewEntry } from "../../../gql/graphql";
 import { createEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
-import { AddingEntry, QueryPath } from "../entryTypes";
+import { QueryPath } from "../entryTypes";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
+import useEntryStore from "../store/useEntryStore";
 
 type Variables = {
   newEntry: NewEntry;
   queryPath: QueryPath;
-  setAddingEntry?: React.Dispatch<React.SetStateAction<AddingEntry>>;
 };
 
 const useCreateEntry = () => {
   const queryClient = useQueryClient();
+  const setInputActive = useEntryStore(
+    (store) => store.modifyEntry.actions.setInputActive
+  );
+
   return useMutation({
     mutationFn: async ({ newEntry }: Variables) => {
       return request(API_BASE_URL, createEntry, { newEntry });
     },
-    onMutate: async ({ queryPath, newEntry, setAddingEntry }) => {
+    onMutate: async ({ queryPath, newEntry }) => {
       await queryClient.cancelQueries({ queryKey: queryPath });
 
       const previousEntries = queryClient.getQueryData<Entry[]>(queryPath);
@@ -27,7 +31,7 @@ const useCreateEntry = () => {
         queryClient.setQueryData<Entry[]>(queryPath, (old) =>
           sortEntries([...(old || []), { ...newEntry, id: -1 }])
         );
-        if (setAddingEntry) setAddingEntry(false);
+        setInputActive("add", false);
       }
       return { previousEntries };
     },

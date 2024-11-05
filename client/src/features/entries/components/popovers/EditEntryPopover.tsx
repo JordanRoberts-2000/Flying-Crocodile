@@ -2,30 +2,27 @@ import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverAnchor } from "@radix-ui/react-popover";
 import AreYouSureDialog from "../AreYouSureDialog";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { QueryPath } from "../../entryTypes";
 import Icon from "@/components/Icon";
+import useEntryStore from "../../store/useEntryStore";
 
-type Props = {
-  open: boolean;
-  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
-  setEditingActive: React.Dispatch<React.SetStateAction<boolean>>;
-  queryPath: QueryPath;
-  isFolder: boolean;
-  children: React.ReactNode;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+const EditEntityPopover = () => {
+  const open = useEntryStore((state) => state.modifyEntry.edit.popoverOpen);
+  const setPopoverOpen = useEntryStore(
+    (state) => state.modifyEntry.actions.setPopoverOpen
+  );
+  const setInputActive = useEntryStore(
+    (store) => store.modifyEntry.actions.setInputActive
+  );
+  const isFolder = useEntryStore(
+    (state) => state.modifyEntry.inputEntryType === "folder"
+  );
+  const popoverAnchor = useEntryStore(
+    (state) => state.modifyEntry.edit.popoverAnchorRef
+  );
 
-const EditEntityPopover = ({
-  open,
-  onOpenChange,
-  children,
-  isFolder,
-  setEditingActive,
-  queryPath,
-}: Props) => {
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingActive(true);
-    onOpenChange(false);
+  const handleEditSelected = () => {
+    setInputActive("edit", true);
+    setPopoverOpen("edit", false);
   };
 
   return (
@@ -35,11 +32,14 @@ const EditEntityPopover = ({
       className="contents"
     >
       <Dialog>
-        <Popover open={open} onOpenChange={onOpenChange}>
-          <PopoverAnchor>{children}</PopoverAnchor>
+        <Popover
+          open={open}
+          onOpenChange={(isOpen) => setPopoverOpen("edit", isOpen)}
+        >
+          <PopoverAnchor virtualRef={popoverAnchor} />
           <PopoverContent className="flex flex-col w-fit p-1 gap-1">
             <button
-              onClick={(e) => handleEdit(e)}
+              onClick={() => handleEditSelected()}
               className="text-left py-2 px-4 text-sm text-neutral-600 font-semibold hover:text-blue-600 hover:bg-blue-50 border-gray-200 border rounded-md gap-4 flex items-center"
             >
               <Icon name="edit" strokeWidth={2} />
@@ -56,7 +56,7 @@ const EditEntityPopover = ({
             </DialogTrigger>
           </PopoverContent>
         </Popover>
-        <AreYouSureDialog queryPath={queryPath} />
+        <AreYouSureDialog />
       </Dialog>
     </div>
   );

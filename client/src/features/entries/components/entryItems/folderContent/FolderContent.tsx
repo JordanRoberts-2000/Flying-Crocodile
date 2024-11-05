@@ -3,7 +3,7 @@ import EntryInput from "../../EntryInput";
 import EntryFolder from "../EntryFolder";
 import EntryLink from "../EntryLink";
 import useGetEntries from "../../../hooks/useGetEntries";
-import { AddingEntry, QueryPath } from "../../../entryTypes";
+import { QueryPath } from "../../../entryTypes";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
 import getEntryId from "@/features/entries/utils/getId";
@@ -11,21 +11,15 @@ import getEntryId from "@/features/entries/utils/getId";
 type Props = {
   queryPath: QueryPath;
   embedLevel: number;
-  setAddingEntry: React.Dispatch<React.SetStateAction<AddingEntry>>;
-  addingEntry: AddingEntry;
+  isAddingEntry: boolean;
 };
 
-const FolderContent = ({
-  queryPath,
-  embedLevel,
-  setAddingEntry,
-  addingEntry,
-}: Props) => {
+const FolderContent = ({ queryPath, embedLevel, isAddingEntry }: Props) => {
   const { data: entries, isError, isPending } = useGetEntries(queryPath);
 
   if (isPending) return <FolderContentLoading />;
   if (isError) return <FolderContentError />;
-  if (!!!entries.length && !addingEntry) return null;
+  if (!!!entries.length && !isAddingEntry) return null;
   return (
     <div
       className="flex py-1 pr-2"
@@ -33,14 +27,12 @@ const FolderContent = ({
     >
       <Separator orientation="vertical" className="ml-4" />
       <ul className="flex flex-col pl-2 w-full gap-0.5">
-        {addingEntry && (
+        {isAddingEntry && (
           <li>
             <EntryInput
               embedLevel={embedLevel + 1}
-              addingEntry={addingEntry}
               mode="add"
               queryPath={queryPath}
-              setAddingEntry={setAddingEntry}
             />
           </li>
         )}

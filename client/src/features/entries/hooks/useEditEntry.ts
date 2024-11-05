@@ -7,15 +7,19 @@ import getEntryId from "../utils/getId";
 import { Entry } from "@/gql/graphql";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
+import useEntryStore from "../store/useEntryStore";
 
 type MutationVariables = {
   queryPath: QueryPath;
   newTitle: string;
-  setEditingActive?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const useUpdateEntry = () => {
   const queryClient = useQueryClient();
+  const setInputActive = useEntryStore(
+    (store) => store.modifyEntry.actions.setInputActive
+  );
+
   return useMutation({
     mutationFn: async ({ queryPath, newTitle }: MutationVariables) => {
       return request(API_BASE_URL, updateEntry, {
@@ -23,7 +27,7 @@ const useUpdateEntry = () => {
         newTitle,
       });
     },
-    onMutate: async ({ queryPath, newTitle, setEditingActive }) => {
+    onMutate: async ({ queryPath, newTitle }) => {
       const parentQueryPath = queryPath.slice(0, -1);
       await queryClient.cancelQueries({ queryKey: parentQueryPath });
 
@@ -42,7 +46,7 @@ const useUpdateEntry = () => {
               )
             : []
         );
-        if (setEditingActive) setEditingActive(false);
+        setInputActive("edit", false);
       }
       return { previousEntries };
     },
