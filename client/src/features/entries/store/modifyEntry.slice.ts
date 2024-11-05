@@ -44,6 +44,7 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
             queryPath,
             add: {
               ...state.modifyEntry.add,
+              inputActive: false,
               popoverOpen:
                 type === "add" ? true : state.modifyEntry.add.popoverOpen,
               popoverAnchorRef:
@@ -53,6 +54,7 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
             },
             edit: {
               ...state.modifyEntry.edit,
+              inputActive: false,
               popoverOpen:
                 type === "edit" ? true : state.modifyEntry.edit.popoverOpen,
               popoverAnchorRef:

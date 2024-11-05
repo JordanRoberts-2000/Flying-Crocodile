@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import clsx from "clsx";
 import EntryInput from "../EntryInput";
 import { QueryPath } from "../../entryTypes";
@@ -6,7 +6,6 @@ import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
 import useLongPress from "@/hooks/useLongPress";
 import FolderContent from "./folderContent/FolderContent";
-import viewTransition from "@/utils/viewTransition";
 import useEntryStore from "../../store/useEntryStore";
 
 type Props = {
@@ -19,7 +18,13 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const folderId = getEntryId(queryPath);
   const isOptimisticEntry = folderId === -1;
 
-  const [folderOpen, setFolderOpen] = useState(false);
+  const folderOpen = useEntryStore((state) =>
+    state.folders.openFolders.has(folderId)
+  );
+  const setFolderOpen = useEntryStore(
+    (state) => state.folders.actions.setFolderOpen
+  );
+
   const addAnchorRef = useRef<HTMLDivElement | null>(null);
   const editAnchorRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,15 +76,12 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
     if (e.button !== 0) return;
     registerMouseUp();
     if (!isLongPress.current) {
-      viewTransition(() => setFolderOpen((prev) => !prev));
+      setFolderOpen(folderId, (prev) => !prev);
     }
   };
 
   return (
     <li
-      // style={{
-      //   ...(embedLevel < 2 ? { viewTransitionName: `entry-${entryId}` } : {}),
-      // }}
       className={clsx(
         "flex flex-col",
         isOptimisticEntry && "pointer-events-none hover:opacity-15"

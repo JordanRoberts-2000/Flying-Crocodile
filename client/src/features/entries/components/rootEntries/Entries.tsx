@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import AddEntityPopover from "../popovers/AddEntityPopover";
 import EntryInput from "../EntryInput";
 import { Separator } from "@/components/ui/separator";
@@ -37,6 +37,23 @@ const Entries = () => {
       state.modifyEntry.queryPath &&
       getEntryId(state.modifyEntry.queryPath) === rootId
   );
+
+  const updateFolderHierarchy = useEntryStore(
+    (state) => state.folders.actions.updateFolderHierarchy
+  );
+
+  useEffect(() => {
+    if (entries) {
+      const folderData = entries
+        .filter((entry) => entry.isFolder)
+        .map((entry) => ({
+          id: entry.id,
+          parentId: entry.parentId ?? null,
+        }));
+
+      updateFolderHierarchy(folderData);
+    }
+  }, [entries, updateFolderHierarchy]);
 
   if (isPending) return <EntriesLoading />;
   if (isError) return <EntriesError />;

@@ -25,15 +25,25 @@ const AddEntityPopover = ({ rootId }: Props) => {
   const popoverAnchor = useEntryStore(
     (state) => state.modifyEntry.add.popoverAnchorRef
   );
+  const entryId = useEntryStore(
+    (state) =>
+      state.modifyEntry.queryPath && getEntryId(state.modifyEntry.queryPath)
+  );
   const setInputActive = useEntryStore(
     (store) => store.modifyEntry.actions.setInputActive
   );
+  const setFolderOpen = useEntryStore(
+    (state) => state.folders.actions.setFolderOpen
+  );
 
   const handleClick = (e: React.MouseEvent, entryType: InputEntryType) => {
+    e.stopPropagation();
     setInputType(entryType);
     setInputActive("add", true);
     setPopoverOpen("add", false);
-    e.stopPropagation();
+    if (entryId) {
+      setFolderOpen(entryId, true);
+    }
   };
 
   return (

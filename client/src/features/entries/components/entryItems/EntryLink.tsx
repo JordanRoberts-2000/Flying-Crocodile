@@ -55,9 +55,6 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
       onContextMenu={handleContextMenu}
       onMouseDown={registerMouseDown}
       onMouseUp={registerMouseUp}
-      style={{
-        ...(embedLevel < 2 ? { viewTransitionName: `entry-${linkId}` } : {}),
-      }}
       className={clsx(
         "flex items-center px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer",
         isOptimisticEntry && "hover:opacity-15 pointer-events-none",

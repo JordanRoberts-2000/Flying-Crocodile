@@ -14,8 +14,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n      }\n    }\n  }\n": types.GetRootEntryDocument,
-    "\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n    }\n  }\n": types.GetEntriesDocument,
+    "\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n        parentId\n      }\n    }\n  }\n": types.GetRootEntryDocument,
+    "\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n      parentId\n    }\n  }\n": types.GetEntriesDocument,
     "\n  mutation CreateEntry($newEntry: NewEntry!) {\n    createEntry(newEntry: $newEntry) {\n      parentId\n      title\n      isFolder\n    }\n  }\n": types.CreateEntryDocument,
     "\n  mutation DeleteEntry($entryId: Int!) {\n    deleteEntry(entryId: $entryId) {\n      id\n    }\n  }\n": types.DeleteEntryDocument,
     "\n  mutation UpdateEntry($entryId: Int!, $newTitle: String!) {\n    updateEntry(entryId: $entryId, newTitle: $newTitle) {\n      id\n      title\n    }\n  }\n": types.UpdateEntryDocument,
@@ -38,11 +38,11 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n        parentId\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetRootEntry($title: String!) {\n    getRootEntries(title: $title) {\n      rootId\n      entries {\n        id\n        title\n        isFolder\n        parentId\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n    }\n  }\n"): (typeof documents)["\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n    }\n  }\n"];
+export function graphql(source: "\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n      parentId\n    }\n  }\n"): (typeof documents)["\n  query GetEntries($parentId: Int) {\n    getEntries(parentId: $parentId) {\n      id\n      title\n      isFolder\n      parentId\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

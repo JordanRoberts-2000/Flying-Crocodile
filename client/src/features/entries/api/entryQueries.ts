@@ -13,6 +13,7 @@ const getRootEntry = graphql(`
         id
         title
         isFolder
+        parentId
       }
     }
   }
@@ -40,6 +41,7 @@ export const getEntries = graphql(`
       id
       title
       isFolder
+      parentId
     }
   }
 `);

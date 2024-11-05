@@ -7,6 +7,8 @@ import { QueryPath } from "../../../entryTypes";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
 import getEntryId from "@/features/entries/utils/getId";
+import useEntryStore from "@/features/entries/store/useEntryStore";
+import { useEffect } from "react";
 
 type Props = {
   queryPath: QueryPath;
@@ -16,6 +18,23 @@ type Props = {
 
 const FolderContent = ({ queryPath, embedLevel, isAddingEntry }: Props) => {
   const { data: entries, isError, isPending } = useGetEntries(queryPath);
+
+  const updateFolderHierarchy = useEntryStore(
+    (state) => state.folders.actions.updateFolderHierarchy
+  );
+
+  useEffect(() => {
+    if (entries) {
+      const folderData = entries
+        .filter((entry) => entry.isFolder)
+        .map((entry) => ({
+          id: entry.id,
+          parentId: entry.parentId ?? null,
+        }));
+
+      updateFolderHierarchy(folderData);
+    }
+  }, [entries, updateFolderHierarchy]);
 
   if (isPending) return <FolderContentLoading />;
   if (isError) return <FolderContentError />;
