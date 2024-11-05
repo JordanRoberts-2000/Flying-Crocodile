@@ -6,9 +6,9 @@ import useGetEntries from "../../../hooks/useGetEntries";
 import { QueryPath } from "../../../entryTypes";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
-import getEntryId from "@/features/entries/utils/getId";
 import useEntryStore from "@/features/entries/store/useEntryStore";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 type Props = {
   queryPath: QueryPath;
@@ -40,40 +40,60 @@ const FolderContent = ({ queryPath, embedLevel, isAddingEntry }: Props) => {
   if (isError) return <FolderContentError />;
   if (!!!entries.length && !isAddingEntry) return null;
   return (
-    <div
-      className="flex py-1 pr-2"
-      style={{ viewTransitionName: `entry-content-${getEntryId(queryPath)}` }}
+    <motion.div
+      initial={{ gridTemplateRows: "0fr" }}
+      animate={{ gridTemplateRows: "1fr" }}
+      exit={{ gridTemplateRows: "0fr" }}
+      transition={{
+        type: "spring",
+        ease: "easeInOut",
+        gridTemplateRows: { duration: 0.3 },
+      }}
+      className="grid py-1 pr-2"
     >
-      <Separator orientation="vertical" className="ml-4" />
-      <ul className="flex flex-col pl-2 w-full gap-0.5">
-        {isAddingEntry && (
-          <li>
-            <EntryInput
-              embedLevel={embedLevel + 1}
-              mode="add"
-              queryPath={queryPath}
-            />
-          </li>
-        )}
-        {entries.map((entry) =>
-          entry.isFolder ? (
-            <EntryFolder
-              key={entry.id}
-              embedLevel={embedLevel + 1}
-              title={entry.title}
-              queryPath={[...queryPath, entry.id]}
-            />
-          ) : (
-            <EntryLink
-              key={entry.id}
-              embedLevel={embedLevel + 1}
-              title={entry.title}
-              queryPath={[...queryPath, entry.id]}
-            />
-          )
-        )}
-      </ul>
-    </div>
+      <div className="flex overflow-hidden row-span-2">
+        <Separator orientation="vertical" className="ml-4" />
+        <motion.ul
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 16, transition: { delay: 0 } }}
+          transition={{
+            type: "spring",
+            bounce: 0.5,
+            duration: 0.3,
+            delay: 0.15,
+          }}
+          className="flex flex-col pl-2 w-full gap-0.5"
+        >
+          {isAddingEntry && (
+            <li>
+              <EntryInput
+                embedLevel={embedLevel + 1}
+                mode="add"
+                queryPath={queryPath}
+              />
+            </li>
+          )}
+          {entries.map((entry) =>
+            entry.isFolder ? (
+              <EntryFolder
+                key={entry.id}
+                embedLevel={embedLevel + 1}
+                title={entry.title}
+                queryPath={[...queryPath, entry.id]}
+              />
+            ) : (
+              <EntryLink
+                key={entry.id}
+                embedLevel={embedLevel + 1}
+                title={entry.title}
+                queryPath={[...queryPath, entry.id]}
+              />
+            )
+          )}
+        </motion.ul>
+      </div>
+    </motion.div>
   );
 };
 

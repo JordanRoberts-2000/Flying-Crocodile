@@ -24,13 +24,13 @@ const AppSidebar = () => {
         </div>
       </div>
       <Entries />
-      {/* <SheetFooter>
+      <SheetFooter>
         <div className="p-4">
           <button className="bg-red-700 text-white rounded-md px-4 py-2">
             Upload file(s)
           </button>
         </div>
-      </SheetFooter> */}
+      </SheetFooter>
     </SheetContent>
   );
 };

@@ -7,6 +7,7 @@ import Icon from "@/components/Icon";
 import useLongPress from "@/hooks/useLongPress";
 import FolderContent from "./folderContent/FolderContent";
 import useEntryStore from "../../store/useEntryStore";
+import { AnimatePresence } from "framer-motion";
 
 type Props = {
   title: string;
@@ -158,13 +159,15 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           />
         </div>
       </div>
-      {folderOpen && (
-        <FolderContent
-          queryPath={queryPath}
-          embedLevel={embedLevel}
-          isAddingEntry={isAddingEntry}
-        />
-      )}
+      <AnimatePresence>
+        {folderOpen && (
+          <FolderContent
+            queryPath={queryPath}
+            embedLevel={embedLevel}
+            isAddingEntry={isAddingEntry}
+          />
+        )}
+      </AnimatePresence>
     </li>
   );
 };
