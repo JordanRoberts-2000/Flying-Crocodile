@@ -1,13 +1,10 @@
-import { useRef } from "react";
 import clsx from "clsx";
 import EntryInput from "../EntryInput";
 import { QueryPath } from "../../entryTypes";
 import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
-import useLongPress from "@/hooks/useLongPress";
 import FolderContent from "./folderContent/FolderContent";
 import useEntryStore from "../../store/useEntryStore";
-import { AnyMxRecord } from "dns";
 
 type Props = {
   title: string;
@@ -19,64 +16,33 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
   const folderId = getEntryId(queryPath);
   const isOptimisticEntry = folderId === -1;
 
+  const inputType = useEntryStore(
+    (store) => store.modifyEntry.edit.inputEntryType
+  );
+
   const folderOpen = useEntryStore((state) =>
     state.folders.openFolders.has(folderId)
   );
-  const setFolderOpen = useEntryStore(
-    (state) => state.folders.actions.setFolderOpen
-  );
-
-  const addAnchorRef = useRef<HTMLDivElement | null>(null);
-  const editAnchorRef = useRef<HTMLDivElement | null>(null);
-
-  const triggerPopover = useEntryStore(
-    (state) => state.modifyEntry.actions.triggerPopover
-  );
-  const setInputType = useEntryStore(
-    (state) => state.modifyEntry.actions.setInputType
-  );
   const editPopoverOpen = useEntryStore(
     (state) =>
-      !!state.modifyEntry.edit.popoverOpen &&
-      state.modifyEntry.queryPath &&
-      getEntryId(state.modifyEntry.queryPath) === folderId
+      state.modifyEntry.edit.popoverOpen &&
+      state.modifyEntry.edit.entryId === folderId
   );
   const addPopoverOpen = useEntryStore(
     (state) =>
-      !!state.modifyEntry.add.popoverOpen &&
-      state.modifyEntry.queryPath &&
-      getEntryId(state.modifyEntry.queryPath) === folderId
+      state.modifyEntry.add.popoverOpen &&
+      state.modifyEntry.add.entryId === folderId
   );
   const isAddingEntry = useEntryStore(
     (store) =>
-      !!store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === folderId &&
+      store.modifyEntry.add.entryId === folderId &&
       store.modifyEntry.add.inputActive
   );
   const isEditingEntry = useEntryStore(
     (store) =>
-      !!store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === folderId &&
+      store.modifyEntry.edit.entryId === folderId &&
       store.modifyEntry.edit.inputActive
   );
-
-  const { longPressHandlers, longPressSuccess } = useLongPress(() => {
-    setInputType("folder");
-    triggerPopover(queryPath, "edit", editAnchorRef);
-  });
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setInputType("folder");
-    triggerPopover(queryPath, "edit", editAnchorRef);
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    if (!longPressSuccess.current) {
-      setFolderOpen(folderId, (prev) => !prev);
-    }
-  };
 
   return (
     <li
@@ -86,12 +52,9 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
       )}
     >
       <div
-        ref={editAnchorRef}
-        onContextMenu={handleContextMenu}
-        {...longPressHandlers}
-        onClick={(e) => handleClick(e)}
+        data-entry-id={folderId}
         className={clsx(
-          "flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
+          "entry folder flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
           embedLevel >= 2 ? "py-1" : "py-2",
           folderOpen && "bg-gray-50",
           (addPopoverOpen || editPopoverOpen) &&
@@ -99,7 +62,6 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
         )}
       >
         <div
-          ref={addAnchorRef}
           className={clsx(
             "outline-gray-100 outline outline-1 rounded-lg relative group shadow",
             embedLevel >= 2 ? "p-1.5" : "p-2",
@@ -107,9 +69,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           )}
         >
           <button
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-            onClick={() => triggerPopover(queryPath, "add", addAnchorRef)}
+            data-add-entry="true"
             className={clsx(
               addPopoverOpen ? "scale-100" : "scale-0",
               "group-hover:scale-100 transition-transform absolute z-50 inset-0 size-full p-1 flex items-center justify-center"
@@ -129,6 +89,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
 
         {isEditingEntry ? (
           <EntryInput
+            inputType={inputType}
             embedLevel={embedLevel}
             defaultValue={title}
             mode="edit"

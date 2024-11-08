@@ -1,21 +1,22 @@
 import { StateCreator } from "zustand";
-import { InputEntryType, ModifyEntry, QueryPath } from "../entryTypes";
+import { InputEntryType, ModifyEntry } from "../entryTypes";
 
 export type ModifyEntrySlice = {
   modifyEntry: {
-    queryPath: QueryPath | null;
-    inputEntryType: InputEntryType;
     add: ModifyEntry;
     edit: ModifyEntry;
     actions: {
       triggerPopover: (
-        queryPath: QueryPath,
-        type: "add" | "edit",
-        anchorRef: React.MutableRefObject<HTMLElement | null>
+        entryId: number,
+        modifyType: "add" | "edit",
+        anchorRef: React.MutableRefObject<Element | null>
       ) => void;
       setPopoverOpen: (type: "add" | "edit", open: boolean) => void;
       setInputActive: (type: "add" | "edit", active: boolean) => void;
-      setInputType: (type: InputEntryType) => void;
+      setInputType: (
+        modifyType: "add" | "edit",
+        entryType: InputEntryType
+      ) => void;
     };
   };
 };
@@ -24,61 +25,48 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
   set
 ) => ({
   modifyEntry: {
-    queryPath: null,
-    inputEntryType: "folder",
     add: {
+      entryId: -2,
+      inputEntryType: "folder",
       inputActive: false,
       popoverOpen: false,
       popoverAnchorRef: undefined,
     },
     edit: {
+      entryId: -2,
+      inputEntryType: "folder",
       inputActive: false,
       popoverOpen: false,
       popoverAnchorRef: undefined,
     },
     actions: {
-      triggerPopover: (queryPath, type, anchorRef) => {
-        set((state) => ({
-          modifyEntry: {
-            ...state.modifyEntry,
-            queryPath,
-            add: {
-              ...state.modifyEntry.add,
-              inputActive: false,
-              popoverOpen:
-                type === "add" ? true : state.modifyEntry.add.popoverOpen,
-              popoverAnchorRef:
-                type === "add"
-                  ? anchorRef
-                  : state.modifyEntry.add.popoverAnchorRef,
+      triggerPopover: (entryId, modifyType, anchorRef) => {
+        set((state) => {
+          const updatedEntry = {
+            ...state.modifyEntry[modifyType],
+            entryId,
+            inputEntryType: state.modifyEntry[modifyType].inputEntryType,
+            inputActive: false,
+            popoverOpen: true,
+            popoverAnchorRef: anchorRef,
+          };
+
+          return {
+            modifyEntry: {
+              ...state.modifyEntry,
+              [modifyType]: updatedEntry,
             },
-            edit: {
-              ...state.modifyEntry.edit,
-              inputActive: false,
-              popoverOpen:
-                type === "edit" ? true : state.modifyEntry.edit.popoverOpen,
-              popoverAnchorRef:
-                type === "edit"
-                  ? anchorRef
-                  : state.modifyEntry.edit.popoverAnchorRef,
-            },
-          },
-        }));
+          };
+        });
       },
 
       setPopoverOpen: (type, isOpen) =>
         set((state) => ({
           modifyEntry: {
             ...state.modifyEntry,
-            add: {
-              ...state.modifyEntry.add,
-              popoverOpen:
-                type === "add" ? isOpen : state.modifyEntry.add.popoverOpen,
-            },
-            edit: {
-              ...state.modifyEntry.edit,
-              popoverOpen:
-                type === "edit" ? isOpen : state.modifyEntry.edit.popoverOpen,
+            [type]: {
+              ...state.modifyEntry[type],
+              popoverOpen: isOpen,
             },
           },
         })),
@@ -87,25 +75,23 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
         set((state) => ({
           modifyEntry: {
             ...state.modifyEntry,
-            add: {
-              ...state.modifyEntry.add,
-              inputActive:
-                type === "add" ? active : state.modifyEntry.add.popoverOpen,
-            },
-            edit: {
-              ...state.modifyEntry.edit,
-              inputActive:
-                type === "edit" ? active : state.modifyEntry.edit.popoverOpen,
+            [type]: {
+              ...state.modifyEntry[type],
+              inputActive: active,
             },
           },
         }));
       },
 
-      setInputType: (type) => {
+      setInputType: (modifyType, entryType) => {
         set((state) => ({
           modifyEntry: {
             ...state.modifyEntry,
-            inputEntryType: type,
+            [modifyType]: {
+              ...state.modifyEntry[modifyType],
+              modifyType,
+              entryType,
+            },
           },
         }));
       },

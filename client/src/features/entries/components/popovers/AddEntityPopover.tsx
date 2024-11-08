@@ -2,7 +2,6 @@ import { Popover, PopoverContent } from "@/components/ui/popover";
 import Icon from "@/components/Icon";
 import { PopoverAnchor } from "@radix-ui/react-popover";
 import { InputEntryType } from "../../entryTypes";
-import getEntryId from "../../utils/getId";
 import useEntryStore from "../../store/useEntryStore";
 
 type Props = {
@@ -14,20 +13,15 @@ const AddEntityPopover = ({ rootId }: Props) => {
   const setPopoverOpen = useEntryStore(
     (state) => state.modifyEntry.actions.setPopoverOpen
   );
-  const isRoot = useEntryStore(
-    (store) =>
-      store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === rootId
-  );
+  const entryId = useEntryStore((store) => store.modifyEntry.add.entryId);
+
+  const isRoot = entryId === rootId;
+
   const setInputType = useEntryStore(
     (state) => state.modifyEntry.actions.setInputType
   );
   const popoverAnchor = useEntryStore(
     (state) => state.modifyEntry.add.popoverAnchorRef
-  );
-  const entryId = useEntryStore(
-    (state) =>
-      state.modifyEntry.queryPath && getEntryId(state.modifyEntry.queryPath)
   );
   const setInputActive = useEntryStore(
     (store) => store.modifyEntry.actions.setInputActive
@@ -38,12 +32,11 @@ const AddEntityPopover = ({ rootId }: Props) => {
 
   const handleClick = (e: React.MouseEvent, entryType: InputEntryType) => {
     e.stopPropagation();
-    setInputType(entryType);
+
+    setInputType("add", entryType);
     setInputActive("add", true);
     setPopoverOpen("add", false);
-    if (entryId) {
-      setFolderOpen(entryId, true);
-    }
+    setFolderOpen(entryId, true);
   };
 
   return (

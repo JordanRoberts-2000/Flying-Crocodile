@@ -12,17 +12,17 @@ type UseLongPressReturn = {
 };
 
 const useLongPress = (
-  onLongPress: () => void,
+  onLongPress: (e: React.MouseEvent | React.TouchEvent) => void,
   holdTime: number = 500
 ): UseLongPressReturn => {
   const longPressSuccess = useRef<boolean>(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const start = () => {
+  const start = (e: React.MouseEvent | React.TouchEvent) => {
     longPressSuccess.current = false;
     timerRef.current = setTimeout(() => {
       longPressSuccess.current = true;
-      onLongPress();
+      onLongPress(e); // Pass the event to the callback
     }, holdTime);
   };
 
@@ -41,10 +41,10 @@ const useLongPress = (
   }, []);
 
   const longPressHandlers = {
-    onMouseDown: start,
+    onMouseDown: (e: React.MouseEvent) => start(e),
     onMouseUp: end,
     onMouseLeave: end,
-    onTouchStart: start,
+    onTouchStart: (e: React.TouchEvent) => start(e),
     onTouchEnd: end,
   };
 

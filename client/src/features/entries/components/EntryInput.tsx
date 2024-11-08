@@ -1,7 +1,7 @@
-import { startTransition, useEffect, useRef } from "react";
+import { useRef } from "react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
-import { QueryPath } from "../entryTypes";
+import { QueryPath, InputEntryType } from "../entryTypes";
 import getEntryId from "../utils/getId";
 import Icon from "@/components/Icon";
 import useEntryStore from "../store/useEntryStore";
@@ -11,13 +11,19 @@ type Props = {
   embedLevel: number;
   mode: "add" | "edit";
   queryPath: QueryPath;
+  inputType: InputEntryType;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
-const EntryInput = ({ embedLevel, mode, queryPath, ...rest }: Props) => {
+const EntryInput = ({
+  embedLevel,
+  mode,
+  queryPath,
+  inputType,
+  ...rest
+}: Props) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const createEntry = useCreateEntry();
   const editEntry = useUpdateEntry();
-  const inputType = useEntryStore((store) => store.modifyEntry.inputEntryType);
   const setInputActive = useEntryStore(
     (store) => store.modifyEntry.actions.setInputActive
   );

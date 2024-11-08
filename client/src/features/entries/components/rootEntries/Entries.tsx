@@ -10,9 +10,9 @@ import Icon from "@/components/Icon";
 import EntryFolder from "../entryItems/EntryFolder";
 import EntryLink from "../entryItems/EntryLink";
 import EditEntityPopover from "../popovers/EditEntryPopover";
-import getEntryId from "../../utils/getId";
 import clsx from "clsx";
 import useEntryStore from "../../store/useEntryStore";
+import useEntryInteractions from "../../hooks/useEntryInteractions";
 
 const TEMP_ROOT_NAME = "gallery";
 
@@ -22,20 +22,22 @@ const Entries = () => {
   const { rootId, entries, isError, isPending } =
     useGetRootEntries(TEMP_ROOT_NAME);
 
+  const inputType = useEntryStore(
+    (store) => store.modifyEntry.add.inputEntryType
+  );
+
   const triggerPopover = useEntryStore(
     (state) => state.modifyEntry.actions.triggerPopover
   );
   const isAddingEntry = useEntryStore(
     (store) =>
-      !!store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === rootId &&
+      store.modifyEntry.add.entryId === rootId &&
       store.modifyEntry.add.inputActive
   );
   const addPopoverOpen = useEntryStore(
     (state) =>
-      !!state.modifyEntry.add.popoverOpen &&
-      state.modifyEntry.queryPath &&
-      getEntryId(state.modifyEntry.queryPath) === rootId
+      state.modifyEntry.add.popoverOpen &&
+      state.modifyEntry.add.entryId === rootId
   );
 
   const updateFolderHierarchy = useEntryStore(
@@ -55,18 +57,18 @@ const Entries = () => {
     }
   }, [entries, updateFolderHierarchy]);
 
+  const rootHandlers = useEntryInteractions();
+
   if (isPending) return <EntriesLoading />;
   if (isError) return <EntriesError />;
 
   return (
-    <>
+    <div {...rootHandlers} className="flex-1 flex-col flex min-h-0">
       <AddEntityPopover rootId={rootId} />
       <EditEntityPopover />
       <button
         ref={addPopoverAnchorRef}
-        onClick={() =>
-          triggerPopover([TEMP_ROOT_NAME, rootId], "add", addPopoverAnchorRef)
-        }
+        onClick={() => triggerPopover(rootId, "add", addPopoverAnchorRef)}
         className={clsx(
           addPopoverOpen && "text-blue-500",
           "w-fit hover:text-blue-500 pt-3 pl-3"
@@ -84,6 +86,7 @@ const Entries = () => {
               <li>
                 <EntryInput
                   embedLevel={1}
+                  inputType={inputType}
                   mode="add"
                   queryPath={[TEMP_ROOT_NAME, rootId]}
                 />
@@ -111,7 +114,7 @@ const Entries = () => {
         )}
         <Separator />
       </div>
-    </>
+    </div>
   );
 };
 

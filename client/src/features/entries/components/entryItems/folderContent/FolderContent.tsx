@@ -18,6 +18,10 @@ type Props = {
 const FolderContent = ({ queryPath, embedLevel, isAddingEntry }: Props) => {
   const { data: entries, isError, isPending } = useGetEntries(queryPath);
 
+  const inputType = useEntryStore(
+    (store) => store.modifyEntry.add.inputEntryType
+  );
+
   const updateFolderHierarchy = useEntryStore(
     (state) => state.folders.actions.updateFolderHierarchy
   );
@@ -45,7 +49,7 @@ const FolderContent = ({ queryPath, embedLevel, isAddingEntry }: Props) => {
         <ul className="flex flex-col pl-2 w-full py-1 gap-0.5">
           {isAddingEntry && (
             <EntryInput
-              key={entries[entries.length - 1] as unknown as number}
+              inputType={inputType}
               embedLevel={embedLevel + 1}
               mode="add"
               queryPath={queryPath}

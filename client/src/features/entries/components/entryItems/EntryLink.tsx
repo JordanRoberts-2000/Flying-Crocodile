@@ -4,7 +4,6 @@ import clsx from "clsx";
 import { QueryPath } from "../../entryTypes";
 import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
-import useLongPress from "@/hooks/useLongPress";
 import useEntryStore from "../../store/useEntryStore";
 
 type Props = {
@@ -19,44 +18,27 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
 
   const anchorRef = useRef<HTMLLIElement | null>(null);
 
-  const triggerPopover = useEntryStore(
-    (state) => state.modifyEntry.actions.triggerPopover
+  const inputType = useEntryStore(
+    (store) => store.modifyEntry.edit.inputEntryType
   );
-  const setInputType = useEntryStore(
-    (state) => state.modifyEntry.actions.setInputType
-  );
+
   const editPopoverOpen = useEntryStore(
     (store) =>
-      !!store.modifyEntry.edit.popoverOpen &&
-      store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === linkId
+      store.modifyEntry.edit.popoverOpen &&
+      store.modifyEntry.edit.entryId === linkId
   );
   const isEditingEntry = useEntryStore(
     (store) =>
-      !!store.modifyEntry.queryPath &&
-      getEntryId(store.modifyEntry.queryPath) === linkId &&
+      store.modifyEntry.edit.entryId === linkId &&
       store.modifyEntry.edit.inputActive
   );
 
-  const { registerMouseDown, registerMouseUp } = useLongPress(() => {
-    setInputType("link");
-    triggerPopover(queryPath, "edit", anchorRef);
-  });
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setInputType("link");
-    triggerPopover(queryPath, "edit", anchorRef);
-  };
-
   return (
     <li
+      data-entry-id={linkId}
       ref={anchorRef}
-      onContextMenu={handleContextMenu}
-      onMouseDown={registerMouseDown}
-      onMouseUp={registerMouseUp}
       className={clsx(
-        "flex items-center px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer",
+        "entry flex items-center px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer",
         isOptimisticEntry && "hover:opacity-15 pointer-events-none",
         embedLevel >= 2 ? "py-1" : "py-2",
         editPopoverOpen && "outline outline-2 outline-blue-300"
@@ -71,6 +53,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
       </div>
       {isEditingEntry ? (
         <EntryInput
+          inputType={inputType}
           embedLevel={embedLevel}
           defaultValue={title}
           mode="edit"
