@@ -7,7 +7,7 @@ import Icon from "@/components/Icon";
 import useLongPress from "@/hooks/useLongPress";
 import FolderContent from "./folderContent/FolderContent";
 import useEntryStore from "../../store/useEntryStore";
-import { AnimatePresence } from "framer-motion";
+import { AnyMxRecord } from "dns";
 
 type Props = {
   title: string;
@@ -60,12 +60,10 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
       store.modifyEntry.edit.inputActive
   );
 
-  const { registerMouseDown, registerMouseUp, isLongPress } = useLongPress(
-    () => {
-      setInputType("folder");
-      triggerPopover(queryPath, "edit", editAnchorRef);
-    }
-  );
+  const { longPressHandlers, longPressSuccess } = useLongPress(() => {
+    setInputType("folder");
+    triggerPopover(queryPath, "edit", editAnchorRef);
+  });
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,10 +71,9 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
     triggerPopover(queryPath, "edit", editAnchorRef);
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    registerMouseUp();
-    if (!isLongPress.current) {
+    if (!longPressSuccess.current) {
       setFolderOpen(folderId, (prev) => !prev);
     }
   };
@@ -91,8 +88,8 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
       <div
         ref={editAnchorRef}
         onContextMenu={handleContextMenu}
-        onMouseDown={registerMouseDown}
-        onMouseUp={(e) => handleMouseUp(e)}
+        {...longPressHandlers}
+        onClick={(e) => handleClick(e)}
         className={clsx(
           "flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
           embedLevel >= 2 ? "py-1" : "py-2",
@@ -104,9 +101,9 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
         <div
           ref={addAnchorRef}
           className={clsx(
-            "outline-gray-100 outline outline-1 rounded-lg relative group",
+            "outline-gray-100 outline outline-1 rounded-lg relative group shadow",
             embedLevel >= 2 ? "p-1.5" : "p-2",
-            folderOpen ? "shadow-blue-300 shadow-sm" : "shadow"
+            folderOpen && "shadow-blue-300"
           )}
         >
           <button
@@ -140,7 +137,7 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
         ) : (
           <p
             className={clsx(
-              "font-semibold select-none text-sm ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis",
+              "font-semibold select-none ml-4 font-sans whitespace-nowrap overflow-hidden text-ellipsis",
               embedLevel >= 2 && "text-sm",
               folderOpen ? "text-blue-400" : "text-neutral-600"
             )}
@@ -159,15 +156,13 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
           />
         </div>
       </div>
-      <AnimatePresence>
-        {folderOpen && (
-          <FolderContent
-            queryPath={queryPath}
-            embedLevel={embedLevel}
-            isAddingEntry={isAddingEntry}
-          />
-        )}
-      </AnimatePresence>
+      {folderOpen && (
+        <FolderContent
+          queryPath={queryPath}
+          embedLevel={embedLevel}
+          isAddingEntry={isAddingEntry}
+        />
+      )}
     </li>
   );
 };

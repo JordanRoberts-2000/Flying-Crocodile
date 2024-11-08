@@ -79,7 +79,7 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
       ) : (
         <p
           className={clsx(
-            "font-semibold select-none ml-4 text-sm font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis",
+            "font-semibold select-none ml-4 font-sans text-neutral-600 whitespace-nowrap overflow-hidden text-ellipsis",
             embedLevel >= 2 && "text-sm"
           )}
         >

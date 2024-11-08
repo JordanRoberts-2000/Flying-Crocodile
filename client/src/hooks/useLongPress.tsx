@@ -1,27 +1,32 @@
 import { useRef, useEffect } from "react";
 
 type UseLongPressReturn = {
-  registerMouseDown: () => void;
-  registerMouseUp: () => void;
-  isLongPress: React.MutableRefObject<boolean>;
+  longPressHandlers: {
+    onMouseDown: (e: React.MouseEvent) => void;
+    onMouseUp: (e: React.MouseEvent) => void;
+    onMouseLeave: (e: React.MouseEvent) => void;
+    onTouchStart: (e: React.TouchEvent) => void;
+    onTouchEnd: (e: React.TouchEvent) => void;
+  };
+  longPressSuccess: React.MutableRefObject<boolean>;
 };
 
 const useLongPress = (
   onLongPress: () => void,
   holdTime: number = 500
 ): UseLongPressReturn => {
-  const isLongPress = useRef<boolean>(false);
+  const longPressSuccess = useRef<boolean>(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const registerMouseDown = () => {
-    isLongPress.current = false;
+  const start = () => {
+    longPressSuccess.current = false;
     timerRef.current = setTimeout(() => {
-      isLongPress.current = true;
+      longPressSuccess.current = true;
       onLongPress();
     }, holdTime);
   };
 
-  const registerMouseUp = () => {
+  const end = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
@@ -35,7 +40,18 @@ const useLongPress = (
     };
   }, []);
 
-  return { registerMouseDown, registerMouseUp, isLongPress };
+  const longPressHandlers = {
+    onMouseDown: start,
+    onMouseUp: end,
+    onMouseLeave: end,
+    onTouchStart: start,
+    onTouchEnd: end,
+  };
+
+  return {
+    longPressHandlers,
+    longPressSuccess,
+  };
 };
 
 export default useLongPress;

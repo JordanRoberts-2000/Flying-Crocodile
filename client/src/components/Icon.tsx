@@ -7,6 +7,7 @@ import FolderIcon from "../assets/svgs/folder.svg?react";
 import UserIcon from "../assets/svgs/user.svg?react";
 import PhotoIcon from "../assets/svgs/photo.svg?react";
 import FolderPlusIcon from "../assets/svgs/folderPlus.svg?react";
+import CloseIcon from "../assets/svgs/close.svg?react";
 
 type name =
   | "plus"
@@ -16,7 +17,8 @@ type name =
   | "arrow"
   | "folderPlus"
   | "user"
-  | "photo";
+  | "photo"
+  | "close";
 
 type Props = {
   name: name;
@@ -56,6 +58,10 @@ const Icon = ({ name, className, ...rest }: Props) => {
     case "user":
       return (
         <UserIcon {...rest} className={cn("size-5 shrink-0", className)} />
+      );
+    case "close":
+      return (
+        <CloseIcon {...rest} className={cn("size-5 shrink-0", className)} />
       );
   }
 };

@@ -62,18 +62,20 @@ const Entries = () => {
     <>
       <AddEntityPopover rootId={rootId} />
       <EditEntityPopover />
-
       <button
         ref={addPopoverAnchorRef}
         onClick={() =>
           triggerPopover([TEMP_ROOT_NAME, rootId], "add", addPopoverAnchorRef)
         }
-        className={clsx(addPopoverOpen && "text-blue-500", "w-fit p-3")}
+        className={clsx(
+          addPopoverOpen && "text-blue-500",
+          "w-fit hover:text-blue-500 pt-3 pl-3"
+        )}
       >
         <Icon name="plus" strokeWidth={2} />
       </button>
 
-      <div className="px-2 pl-4 flex-1 flex flex-col overflow-y-auto">
+      <div className="px-2 pl-4 flex-1 flex flex-col overflow-y-auto py-1">
         {!!!entries.length ? (
           <EntriesEmpty />
         ) : (

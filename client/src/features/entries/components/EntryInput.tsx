@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { startTransition, useEffect, useRef } from "react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
 import { QueryPath } from "../entryTypes";
 import getEntryId from "../utils/getId";
 import Icon from "@/components/Icon";
 import useEntryStore from "../store/useEntryStore";
+import clsx from "clsx";
 
 type Props = {
   embedLevel: number;
@@ -17,6 +18,9 @@ const EntryInput = ({ embedLevel, mode, queryPath, ...rest }: Props) => {
   const createEntry = useCreateEntry();
   const editEntry = useUpdateEntry();
   const inputType = useEntryStore((store) => store.modifyEntry.inputEntryType);
+  const setInputActive = useEntryStore(
+    (store) => store.modifyEntry.actions.setInputActive
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,30 +41,55 @@ const EntryInput = ({ embedLevel, mode, queryPath, ...rest }: Props) => {
       });
     }
   };
+
+  const handleBlur = () => {
+    console.log("blur");
+    // startTransition(() => {
+    //   setInputActive("add", false);
+    // });
+    setInputActive("add", false);
+  };
   return (
-    <form onSubmit={(e) => handleSubmit(e)} className="w-full relative">
+    <form
+      onSubmit={(e) => handleSubmit(e)}
+      onBlur={() => handleBlur()}
+      className={clsx(
+        "w-full relative flex items-center focus-within:ring-2 focus-within:ring-blue-500 rounded-md px-2",
+        mode === "edit" ? "mx-1" : "py-1"
+      )}
+    >
       {mode === "add" &&
         (inputType === "folder" ? (
-          <Icon
-            name="folderPlus"
-            className="absolute left-4 top-1/2 -translate-y-1/2"
-          />
+          <div className={clsx(embedLevel >= 2 ? "p-1" : "p-1.5")}>
+            <Icon
+              name="folderPlus"
+              className={clsx(embedLevel >= 2 ? "size-5" : "size-6")}
+            />
+          </div>
         ) : (
-          <Icon
-            name="photo"
-            className="absolute left-4 top-1/2 -translate-y-1/2"
-          />
+          <div className={clsx(embedLevel >= 2 ? "p-1" : "p-1.5")}>
+            <Icon
+              name="photo"
+              className={clsx(embedLevel >= 2 ? "size-5" : "size-6")}
+            />
+          </div>
         ))}
 
       <input
         {...rest}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${embedLevel >= 2 ? "p-1" : "p-2"} ${
-          mode === "add" && "pl-14"
-        } font-semibold`}
+        className={clsx(
+          `w-full font-semibold focus:outline-none`,
+          embedLevel >= 2 ? "text-sm p-1" : "p-2",
+          mode === "add" && "pl-4"
+        )}
         placeholder={inputType === "folder" ? "Folder name" : "Gallery name"}
         ref={inputRef}
         autoFocus
+      />
+      <Icon
+        name="close"
+        className="active:scale-90 transition-transform cursor-pointer"
       />
     </form>
   );
