@@ -3,10 +3,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Entry, NewEntry } from "../../../gql/graphql";
 import { createEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
-import { QueryPath } from "../entryTypes";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
 import useEntryStore from "../store/useEntryStore";
+import { QueryPath } from "../entryTypes";
 
 type Variables = {
   newEntry: NewEntry;

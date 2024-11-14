@@ -7,13 +7,19 @@ import {
 } from "@/components/ui/dialog";
 import useDeleteEntry from "../hooks/useDeleteEntry";
 import useEntryStore from "../store/useEntryStore";
+import { QueryPath } from "../entryTypes";
 
 const AreYouSureDialog = () => {
   const deleteEntry = useDeleteEntry();
   const queryPath = useEntryStore((state) => state.modifyEntry.queryPath);
 
   const handleDeleteEntry = () => {
-    if (queryPath) deleteEntry.mutate(queryPath);
+    if (queryPath) {
+      deleteEntry.mutate({
+        queryPath,
+        parentQueryPath: queryPath.slice(0, -1) as QueryPath,
+      });
+    }
   };
 
   return (

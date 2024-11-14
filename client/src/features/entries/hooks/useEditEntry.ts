@@ -2,15 +2,16 @@ import request from "graphql-request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
-import { QueryPath } from "../entryTypes";
-import getEntryId from "../utils/getId";
 import { Entry } from "@/gql/graphql";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
 import useEntryStore from "../store/useEntryStore";
+import { getEntryId } from "../utils/getEntryId";
+import { QueryPath } from "../entryTypes";
 
 type MutationVariables = {
   queryPath: QueryPath;
+  parentQueryPath: QueryPath;
   newTitle: string;
 };
 
@@ -22,13 +23,14 @@ const useUpdateEntry = () => {
 
   return useMutation({
     mutationFn: async ({ queryPath, newTitle }: MutationVariables) => {
+      const entryId = getEntryId(queryPath);
       return request(API_BASE_URL, updateEntry, {
-        entryId: getEntryId(queryPath),
+        entryId,
         newTitle,
       });
     },
-    onMutate: async ({ queryPath, newTitle }) => {
-      const parentQueryPath = queryPath.slice(0, -1);
+    onMutate: async ({ queryPath, parentQueryPath, newTitle }) => {
+      const entryId = getEntryId(queryPath);
       await queryClient.cancelQueries({ queryKey: parentQueryPath });
 
       const previousEntries =
@@ -39,9 +41,7 @@ const useUpdateEntry = () => {
           old
             ? sortEntries(
                 old.map((entry) =>
-                  entry.id !== getEntryId(queryPath)
-                    ? entry
-                    : { ...entry, title: newTitle }
+                  entry.id !== entryId ? entry : { ...entry, title: newTitle }
                 )
               )
             : []
@@ -50,20 +50,17 @@ const useUpdateEntry = () => {
       }
       return { previousEntries };
     },
-    onError: (_error, { queryPath }, context) => {
+    onError: (_error, { parentQueryPath }, context) => {
       toast.error("Entry edit failed");
       if (context?.previousEntries) {
-        queryClient.setQueryData(
-          queryPath.slice(0, -1),
-          context.previousEntries
-        );
+        queryClient.setQueryData(parentQueryPath, context.previousEntries);
       }
     },
     onSuccess: () => {
       toast.success("Entry edited successfully");
     },
-    onSettled: (_data, _error, { queryPath }) => {
-      queryClient.invalidateQueries({ queryKey: queryPath.slice(0, -1) });
+    onSettled: (_data, _error, { parentQueryPath }) => {
+      queryClient.invalidateQueries({ queryKey: parentQueryPath });
     },
   });
 };

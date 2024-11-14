@@ -13,7 +13,7 @@ const AddEntityPopover = ({ rootId }: Props) => {
   const setPopoverOpen = useEntryStore(
     (state) => state.modifyEntry.actions.setPopoverOpen
   );
-  const entryId = useEntryStore((store) => store.modifyEntry.add.entryId);
+  const entryId = useEntryStore((store) => store.modifyEntry.id.entryId);
 
   const isRoot = entryId === rootId;
 

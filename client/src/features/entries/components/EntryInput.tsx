@@ -1,11 +1,11 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
-import { QueryPath, InputEntryType } from "../entryTypes";
-import getEntryId from "../utils/getId";
+import { InputEntryType, QueryPath } from "../entryTypes";
 import Icon from "@/components/Icon";
 import useEntryStore from "../store/useEntryStore";
 import clsx from "clsx";
+import { getEntryId, getEntryParentId } from "../utils/getEntryId";
 
 type Props = {
   embedLevel: number;
@@ -30,35 +30,52 @@ const EntryInput = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const entryId = getEntryId(queryPath);
+    const parentId = getEntryParentId(queryPath);
     if (mode === "add") {
       createEntry.mutate({
         newEntry: {
           isFolder: inputType === "folder",
           title: inputRef.current!.value,
-          parentId: getEntryId(queryPath),
+          parentId: entryId,
         },
         queryPath,
       });
     }
     if (mode === "edit") {
-      editEntry.mutate({
-        newTitle: inputRef.current!.value,
-        queryPath,
-      });
+      if (parentId) {
+        editEntry.mutate({
+          newTitle: inputRef.current!.value,
+          queryPath,
+          parentQueryPath: queryPath.slice(0, -1) as QueryPath,
+        });
+      }
     }
   };
 
   const handleBlur = () => {
-    console.log("blur");
-    // startTransition(() => {
-    //   setInputActive("add", false);
-    // });
     setInputActive("add", false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        handleBlur();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   return (
     <form
       onSubmit={(e) => handleSubmit(e)}
-      onBlur={() => handleBlur()}
       className={clsx(
         "w-full relative flex items-center focus-within:ring-2 focus-within:ring-blue-500 rounded-md px-2",
         mode === "edit" ? "mx-1" : "py-1"
@@ -83,7 +100,6 @@ const EntryInput = ({
 
       <input
         {...rest}
-        onClick={(e) => e.stopPropagation()}
         className={clsx(
           `w-full font-semibold focus:outline-none`,
           embedLevel >= 2 ? "text-sm p-1" : "p-2",

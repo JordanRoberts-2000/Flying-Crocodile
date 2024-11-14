@@ -1,7 +1,6 @@
 export type InputEntryType = "folder" | "link";
 
 export type ModifyEntry = {
-  entryId: number;
   inputEntryType: InputEntryType;
   inputActive: boolean;
   popoverOpen: boolean;

@@ -1,10 +1,10 @@
 import EntryInput from "../EntryInput";
 import { useRef } from "react";
 import clsx from "clsx";
-import { QueryPath } from "../../entryTypes";
-import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
 import useEntryStore from "../../store/useEntryStore";
+import { QueryPath } from "../../entryTypes";
+import { getEntryId } from "../../utils/getEntryId";
 
 type Props = {
   queryPath: QueryPath;
@@ -13,8 +13,8 @@ type Props = {
 };
 
 const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
-  const linkId = getEntryId(queryPath);
-  const isOptimisticEntry = linkId === -1;
+  const entryId = getEntryId(queryPath);
+  const isOptimisticEntry = entryId === -1;
 
   const anchorRef = useRef<HTMLLIElement | null>(null);
 
@@ -25,17 +25,20 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
   const editPopoverOpen = useEntryStore(
     (store) =>
       store.modifyEntry.edit.popoverOpen &&
-      store.modifyEntry.edit.entryId === linkId
+      store.modifyEntry.id.entryId === entryId
   );
   const isEditingEntry = useEntryStore(
     (store) =>
-      store.modifyEntry.edit.entryId === linkId &&
+      store.modifyEntry.id.entryId === entryId &&
       store.modifyEntry.edit.inputActive
   );
 
   return (
     <li
-      data-entry-id={linkId}
+      draggable="true"
+      data-querypath={JSON.stringify(queryPath)}
+      data-entry-type={"link"}
+      data-entry-title={title}
       ref={anchorRef}
       className={clsx(
         "entry flex items-center px-2 hover:bg-gray-50 transition-colors rounded-md cursor-pointer",
@@ -53,11 +56,11 @@ const EntryLink = ({ queryPath, title, embedLevel }: Props) => {
       </div>
       {isEditingEntry ? (
         <EntryInput
+          queryPath={queryPath}
           inputType={inputType}
           embedLevel={embedLevel}
           defaultValue={title}
           mode="edit"
-          queryPath={queryPath}
         />
       ) : (
         <p

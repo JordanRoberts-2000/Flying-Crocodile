@@ -17,7 +17,7 @@ const useGetRootEntries = (title: string): RootEntriesData => {
     isPending: rootPending,
     isError: rootErr,
   } = useQuery<RootEntry["rootId"], Error>({
-    queryKey: [title],
+    queryKey: ["entries", "root", title],
     queryFn: () => fetchRootEntry(title, queryClient),
   });
 
@@ -25,7 +25,7 @@ const useGetRootEntries = (title: string): RootEntriesData => {
     data: entries,
     isPending: entriesPending,
     isError: entriesErr,
-  } = useGetEntries([title, rootId]);
+  } = useGetEntries(["entries", rootId]);
 
   useErrorNotification(rootErr, `Error getting root folder: "${title}"`);
 

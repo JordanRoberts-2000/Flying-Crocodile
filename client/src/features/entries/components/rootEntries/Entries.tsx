@@ -13,31 +13,34 @@ import EditEntityPopover from "../popovers/EditEntryPopover";
 import clsx from "clsx";
 import useEntryStore from "../../store/useEntryStore";
 import useEntryInteractions from "../../hooks/useEntryInteractions";
-
-const TEMP_ROOT_NAME = "gallery";
+import EntryDragCover from "../EntryDragCover";
+import { QueryPath } from "../../entryTypes";
 
 const Entries = () => {
   const addPopoverAnchorRef = useRef<HTMLButtonElement | null>(null);
 
-  const { rootId, entries, isError, isPending } =
-    useGetRootEntries(TEMP_ROOT_NAME);
+  const { rootId, entries, isError, isPending } = useGetRootEntries("gallery");
 
   const inputType = useEntryStore(
-    (store) => store.modifyEntry.add.inputEntryType
+    (state) => state.modifyEntry.add.inputEntryType
   );
 
   const triggerPopover = useEntryStore(
     (state) => state.modifyEntry.actions.triggerPopover
   );
   const isAddingEntry = useEntryStore(
-    (store) =>
-      store.modifyEntry.add.entryId === rootId &&
-      store.modifyEntry.add.inputActive
+    (state) =>
+      state.modifyEntry.id.entryId === rootId &&
+      state.modifyEntry.add.inputActive
   );
   const addPopoverOpen = useEntryStore(
     (state) =>
       state.modifyEntry.add.popoverOpen &&
-      state.modifyEntry.add.entryId === rootId
+      state.modifyEntry.id.entryId === rootId
+  );
+
+  const draggingOver = useEntryStore(
+    (state) => state.dragging.entryId === rootId
   );
 
   const updateFolderHierarchy = useEntryStore(
@@ -62,13 +65,15 @@ const Entries = () => {
   if (isPending) return <EntriesLoading />;
   if (isError) return <EntriesError />;
 
+  const queryPath = ["entries", rootId] as QueryPath;
   return (
-    <div {...rootHandlers} className="flex-1 flex-col flex min-h-0">
+    <div {...rootHandlers} className="flex-1 flex-col flex min-h-0 relative">
+      <EntryDragCover />
       <AddEntityPopover rootId={rootId} />
       <EditEntityPopover />
       <button
         ref={addPopoverAnchorRef}
-        onClick={() => triggerPopover(rootId, "add", addPopoverAnchorRef)}
+        onClick={() => triggerPopover(queryPath, "add", addPopoverAnchorRef)}
         className={clsx(
           addPopoverOpen && "text-blue-500",
           "w-fit hover:text-blue-500 pt-3 pl-3"
@@ -77,8 +82,14 @@ const Entries = () => {
         <Icon name="plus" strokeWidth={2} />
       </button>
 
-      <div className="px-2 pl-4 flex-1 flex flex-col overflow-y-auto py-1">
-        {!!!entries.length ? (
+      <div
+        data-querypath={JSON.stringify(queryPath)}
+        className={clsx(
+          "dropEntry px-2 pl-4 flex-1 flex flex-col overflow-y-auto py-1",
+          draggingOver && "bg-lime-300"
+        )}
+      >
+        {!!!entries.length && !isAddingEntry ? (
           <EntriesEmpty />
         ) : (
           <ul className="flex flex-col flex-1 gap-0.5">
@@ -88,7 +99,7 @@ const Entries = () => {
                   embedLevel={1}
                   inputType={inputType}
                   mode="add"
-                  queryPath={[TEMP_ROOT_NAME, rootId]}
+                  queryPath={queryPath}
                 />
               </li>
             )}
@@ -99,14 +110,14 @@ const Entries = () => {
                   key={entry.id}
                   embedLevel={1}
                   title={entry.title}
-                  queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
+                  queryPath={[...queryPath, entry.id]}
                 />
               ) : (
                 <EntryLink
                   key={entry.id}
                   embedLevel={1}
                   title={entry.title}
-                  queryPath={[TEMP_ROOT_NAME, rootId, entry.id]}
+                  queryPath={[...queryPath, entry.id]}
                 />
               )
             )}

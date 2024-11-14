@@ -8,7 +8,7 @@ function App() {
   const queryClient = useQueryClient();
   useEffect(() => {
     queryClient.prefetchQuery({
-      queryKey: ["gallery"],
+      queryKey: ["entries", "root", "gallery"],
       queryFn: () => fetchRootEntry("gallery", queryClient),
     });
   }, []);

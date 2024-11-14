@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import EntryInput from "../EntryInput";
-import { QueryPath } from "../../entryTypes";
-import getEntryId from "../../utils/getId";
 import Icon from "@/components/Icon";
 import FolderContent from "./folderContent/FolderContent";
 import useEntryStore from "../../store/useEntryStore";
+import { QueryPath } from "../../entryTypes";
+import { getEntryId } from "../../utils/getEntryId";
 
 type Props = {
   title: string;
@@ -13,48 +13,56 @@ type Props = {
 };
 
 const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
-  const folderId = getEntryId(queryPath);
-  const isOptimisticEntry = folderId === -1;
+  const entryId = getEntryId(queryPath);
+  const isOptimisticEntry = entryId === -1;
 
   const inputType = useEntryStore(
     (store) => store.modifyEntry.edit.inputEntryType
   );
 
   const folderOpen = useEntryStore((state) =>
-    state.folders.openFolders.has(folderId)
+    state.folders.openFolders.has(entryId)
   );
   const editPopoverOpen = useEntryStore(
     (state) =>
       state.modifyEntry.edit.popoverOpen &&
-      state.modifyEntry.edit.entryId === folderId
+      state.modifyEntry.id.entryId === entryId
   );
   const addPopoverOpen = useEntryStore(
     (state) =>
       state.modifyEntry.add.popoverOpen &&
-      state.modifyEntry.add.entryId === folderId
+      state.modifyEntry.id.entryId === entryId
   );
   const isAddingEntry = useEntryStore(
-    (store) =>
-      store.modifyEntry.add.entryId === folderId &&
-      store.modifyEntry.add.inputActive
+    (state) =>
+      state.modifyEntry.id.entryId === entryId &&
+      state.modifyEntry.add.inputActive
   );
   const isEditingEntry = useEntryStore(
-    (store) =>
-      store.modifyEntry.edit.entryId === folderId &&
-      store.modifyEntry.edit.inputActive
+    (state) =>
+      state.modifyEntry.id.entryId === entryId &&
+      state.modifyEntry.edit.inputActive
+  );
+  const draggingOver = useEntryStore(
+    (state) => state.dragging.entryId === entryId
   );
 
   return (
     <li
+      data-querypath={JSON.stringify(queryPath)}
       className={clsx(
-        "flex flex-col",
-        isOptimisticEntry && "pointer-events-none hover:opacity-15"
+        "dropEntry flex flex-col",
+        isOptimisticEntry && "pointer-events-none hover:opacity-15",
+        draggingOver && "bg-lime-300"
       )}
     >
       <div
-        data-entry-id={folderId}
+        draggable="true"
+        data-querypath={JSON.stringify(queryPath)}
+        data-entry-type={"folder"}
+        data-entry-title={title}
         className={clsx(
-          "entry folder flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
+          "entry flex px-2 rounded-md cursor-pointer items-center hover:bg-gray-50 transition-colors",
           embedLevel >= 2 ? "py-1" : "py-2",
           folderOpen && "bg-gray-50",
           (addPopoverOpen || editPopoverOpen) &&
@@ -89,11 +97,11 @@ const EntryFolder = ({ title, embedLevel, queryPath }: Props) => {
 
         {isEditingEntry ? (
           <EntryInput
+            queryPath={queryPath}
             inputType={inputType}
             embedLevel={embedLevel}
             defaultValue={title}
             mode="edit"
-            queryPath={queryPath}
           />
         ) : (
           <p

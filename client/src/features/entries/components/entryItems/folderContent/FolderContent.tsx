@@ -3,11 +3,11 @@ import EntryInput from "../../EntryInput";
 import EntryFolder from "../EntryFolder";
 import EntryLink from "../EntryLink";
 import useGetEntries from "../../../hooks/useGetEntries";
-import { QueryPath } from "../../../entryTypes";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
 import useEntryStore from "@/features/entries/store/useEntryStore";
 import { useEffect } from "react";
+import { QueryPath } from "@/features/entries/entryTypes";
 
 type Props = {
   queryPath: QueryPath;

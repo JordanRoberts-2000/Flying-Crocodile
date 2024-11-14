@@ -14,7 +14,7 @@ const EditEntityPopover = () => {
     (store) => store.modifyEntry.actions.setInputActive
   );
   const isFolder = useEntryStore(
-    (state) => state.modifyEntry.inputEntryType === "folder"
+    (state) => state.modifyEntry.edit.inputEntryType === "folder"
   );
   const popoverAnchor = useEntryStore(
     (state) => state.modifyEntry.edit.popoverAnchorRef

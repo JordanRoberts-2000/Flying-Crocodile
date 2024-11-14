@@ -1,18 +1,24 @@
 import { StateCreator } from "zustand";
-import { InputEntryType, ModifyEntry } from "../entryTypes";
+import { InputEntryType, ModifyEntry, QueryPath } from "../entryTypes";
+import { getEntryId, getEntryParentId } from "../utils/getEntryId";
 
 export type ModifyEntrySlice = {
   modifyEntry: {
+    queryPath: QueryPath | null;
+    id: {
+      parentId: number | null;
+      entryId: number;
+    };
     add: ModifyEntry;
     edit: ModifyEntry;
     actions: {
       triggerPopover: (
-        entryId: number,
+        queryPath: QueryPath,
         modifyType: "add" | "edit",
         anchorRef: React.MutableRefObject<Element | null>
       ) => void;
-      setPopoverOpen: (type: "add" | "edit", open: boolean) => void;
-      setInputActive: (type: "add" | "edit", active: boolean) => void;
+      setPopoverOpen: (modifyType: "add" | "edit", open: boolean) => void;
+      setInputActive: (modifyType: "add" | "edit", active: boolean) => void;
       setInputType: (
         modifyType: "add" | "edit",
         entryType: InputEntryType
@@ -25,26 +31,28 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
   set
 ) => ({
   modifyEntry: {
-    add: {
+    queryPath: null,
+    id: {
       entryId: -2,
+      parentId: -2,
+    },
+    add: {
       inputEntryType: "folder",
       inputActive: false,
       popoverOpen: false,
       popoverAnchorRef: undefined,
     },
     edit: {
-      entryId: -2,
       inputEntryType: "folder",
       inputActive: false,
       popoverOpen: false,
       popoverAnchorRef: undefined,
     },
     actions: {
-      triggerPopover: (entryId, modifyType, anchorRef) => {
+      triggerPopover: (queryPath, modifyType, anchorRef) => {
         set((state) => {
           const updatedEntry = {
             ...state.modifyEntry[modifyType],
-            entryId,
             inputEntryType: state.modifyEntry[modifyType].inputEntryType,
             inputActive: false,
             popoverOpen: true,
@@ -54,29 +62,34 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
           return {
             modifyEntry: {
               ...state.modifyEntry,
+              queryPath,
+              id: {
+                entryId: getEntryId(queryPath),
+                parentId: getEntryParentId(queryPath),
+              },
               [modifyType]: updatedEntry,
             },
           };
         });
       },
 
-      setPopoverOpen: (type, isOpen) =>
+      setPopoverOpen: (modifyType, isOpen) =>
         set((state) => ({
           modifyEntry: {
             ...state.modifyEntry,
-            [type]: {
-              ...state.modifyEntry[type],
+            [modifyType]: {
+              ...state.modifyEntry[modifyType],
               popoverOpen: isOpen,
             },
           },
         })),
 
-      setInputActive: (type, active) => {
+      setInputActive: (modifyType, active) => {
         set((state) => ({
           modifyEntry: {
             ...state.modifyEntry,
-            [type]: {
-              ...state.modifyEntry[type],
+            [modifyType]: {
+              ...state.modifyEntry[modifyType],
               inputActive: active,
             },
           },
@@ -89,8 +102,7 @@ export const createModifyEntrySlice: StateCreator<ModifyEntrySlice> = (
             ...state.modifyEntry,
             [modifyType]: {
               ...state.modifyEntry[modifyType],
-              modifyType,
-              entryType,
+              inputEntryType: entryType,
             },
           },
         }));

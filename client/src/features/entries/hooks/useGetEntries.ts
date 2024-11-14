@@ -8,30 +8,30 @@ import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import sortEntries from "../utils/sortEntries";
 import { API_BASE_URL } from "@/constants";
-import { QueryPath } from "../entryTypes";
-import getEntryId from "../utils/getId";
 import useErrorNotification from "./useErrorNotification";
+import { QueryPath } from "../entryTypes";
+import { getEntryId } from "../utils/getEntryId";
 
-const useGetEntries = (queryPath: QueryPath) => {
-  const rootId = queryPath[1];
+const useGetEntries = (queryKey: QueryPath) => {
+  const entryId = getEntryId(queryKey);
   const res = useQuery<Entry[], Error>({
-    queryKey: queryPath,
+    queryKey,
     queryFn: async () => {
       const data = await request<GetEntriesQuery, GetEntriesQueryVariables>(
         API_BASE_URL,
         getEntries,
         {
-          parentId: getEntryId(queryPath),
+          parentId: entryId,
         }
       );
       return sortEntries(data.getEntries);
     },
-    enabled: rootId !== undefined && getEntryId(queryPath) !== -1,
+    enabled: entryId !== undefined && entryId !== -1,
   });
 
   useErrorNotification(
     res.isError,
-    `Error getting entries from id: "${[queryPath]}"`
+    `Error getting entries from id: "${entryId}"`
   );
 
   return res;

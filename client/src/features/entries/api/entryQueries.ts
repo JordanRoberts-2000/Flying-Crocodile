@@ -30,7 +30,7 @@ export const fetchRootEntry = async (
   );
 
   const { rootId, entries } = data.getRootEntries;
-  queryClient.setQueryData(["gallery", rootId], sortEntries(entries));
+  queryClient.setQueryData(["entries", rootId], sortEntries(entries));
 
   return rootId;
 };
