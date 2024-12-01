@@ -1,6 +1,7 @@
 CREATE TABLE entries (
   id SERIAL PRIMARY KEY,
   title VARCHAR NOT NULL,
-  parentId INT,
-  FOREIGN KEY (parentId) REFERENCES entries(id) ON DELETE CASCADE
+  parent_id INT,
+  is_folder BOOLEAN NOT NULL DEFAULT false,
+  FOREIGN KEY (parent_id) REFERENCES entries(id) ON DELETE CASCADE
 )

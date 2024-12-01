@@ -1,10 +1,10 @@
-use crate::db::Db;
+use crate::db::DbPool;
 use crate::models::{Entry, NewEntry};
 use crate::schema::entries;
 use crate::schema::entries::dsl::*;
 use diesel::prelude::*;
 
-pub fn initialize_root_folders(db: &Db) {
+pub fn initialize_root_folders(db: &DbPool) {
     let root_folders = vec!["fonts", "notes", "gallery"];
 
     for folder in root_folders {
@@ -17,7 +17,7 @@ pub fn initialize_root_folders(db: &Db) {
     }
 }
 
-pub fn check_if_entry_exists(db: &Db, entry_name: &str) -> bool {
+pub fn check_if_entry_exists(db: &DbPool, entry_name: &str) -> bool {
     let mut connection = db.get().expect("Failed to get DB connection from pool");
     entries
         .filter(title.eq(entry_name))
@@ -26,7 +26,7 @@ pub fn check_if_entry_exists(db: &Db, entry_name: &str) -> bool {
         .is_ok()
 }
 
-pub fn create_entry(db: &Db, entry_name: &str) -> Result<(), diesel::result::Error> {
+pub fn create_entry(db: &DbPool, entry_name: &str) -> Result<(), diesel::result::Error> {
     let mut connection = db.get().expect("Failed to get DB connection from pool");
 
     let new_entry = NewEntry {

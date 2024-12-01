@@ -5,7 +5,7 @@ use diesel::{
 use dotenv::dotenv;
 use std::env;
 
-pub type Db = Pool<ConnectionManager<PgConnection>>;
+pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 pub fn get_connection_pool() -> Pool<ConnectionManager<PgConnection>> {
     dotenv().ok();

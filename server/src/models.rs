@@ -19,3 +19,9 @@ pub struct NewEntry {
     pub parent_id: Option<i32>,
     pub is_folder: bool,
 }
+
+#[derive(SimpleObject)]
+pub struct RootEntry {
+    pub root_id: i32,
+    pub entries: Vec<Entry>,
+}

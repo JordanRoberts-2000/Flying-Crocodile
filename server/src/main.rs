@@ -1,22 +1,27 @@
+use std::time::Instant;
+
 use actix_cors::Cors;
 use actix_web::{guard, web, App, HttpResponse, HttpServer, Result};
 use async_graphql::http::GraphiQLSource;
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use db::get_connection_pool;
 use graphql::schema::{create_schema, AppSchema};
+use routes::health::health_check;
 use utils::initialize_root_folders;
 
 mod db;
 mod graphql;
 mod models;
+mod routes;
 mod schema;
 mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db = get_connection_pool();
-    initialize_root_folders(&db.clone());
-    let schema = web::Data::new(create_schema(db));
+    let start_time = Instant::now();
+    let db_pool = get_connection_pool();
+    initialize_root_folders(&db_pool.clone());
+    let schema = web::Data::new(create_schema(&db_pool.clone()));
     println!("Server running");
     HttpServer::new(move || {
         App::new()
@@ -27,6 +32,8 @@ async fn main() -> std::io::Result<()> {
                     .allow_any_header(),
             )
             .app_data(schema.clone())
+            .app_data(web::Data::new(db_pool.clone()))
+            .app_data(web::Data::new(start_time))
             .service(
                 web::resource("/graphql")
                     .guard(guard::Post())
@@ -37,6 +44,7 @@ async fn main() -> std::io::Result<()> {
                     .guard(guard::Get())
                     .to(index_graphiql),
             )
+            .route("/health", web::get().to(health_check))
     })
     .bind(("127.0.0.1", 3000))?
     .run()
