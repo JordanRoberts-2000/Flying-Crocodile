@@ -4,25 +4,7 @@ use crate::{db::DbPool, schema::entries};
 use actix_web::web;
 use async_graphql::{Context, Object, Result};
 use diesel::prelude::*;
-
-#[derive(Default)]
-pub struct EntryQuery;
-
-#[Object]
-impl EntryQuery {
-    async fn get_entries(&self, ctx: &Context<'_>, parent_id: Option<i32>) -> Result<Vec<Entry>> {
-        let pool = ctx.data::<DbPool>()?.clone();
-        let pid_cant_be_null = parent_id.expect("Null needs to be removed from top");
-        let entries_result = web::block(move || {
-            let mut connection = pool.get().expect("Failed to get DB connection from pool");
-            dsl::entries
-                .filter(entries::parent_id.eq(pid_cant_be_null))
-                .load::<Entry>(&mut connection)
-        })
-        .await??;
-        Ok(entries_result)
-    }
-}
+use log::info;
 
 #[derive(Default)]
 pub struct RootEntryQuery;
@@ -30,6 +12,8 @@ pub struct RootEntryQuery;
 #[Object]
 impl RootEntryQuery {
     async fn get_root_entries(&self, ctx: &Context<'_>, title: String) -> Result<RootEntry> {
+        info!("GraphQL Query hit: get_root_entries with title: {}", title);
+
         let pool = ctx.data::<DbPool>()?.clone();
         let root_id = web::block({
             let pool = pool.clone();

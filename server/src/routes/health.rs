@@ -1,15 +1,14 @@
 use actix_web::{web, HttpResponse, Responder};
 use diesel::{dsl::sql_query, RunQueryDsl};
-use std::{env, time::Instant};
+use log::info;
 
-use crate::db::DbPool;
+use crate::AppState;
 
-pub async fn health_check(
-    db_pool: web::Data<DbPool>,
-    start_time: web::Data<Instant>,
-) -> impl Responder {
-    let environment = env::var("ENVIRONMENT").expect("ENVIRONMENT not found in .env");
-    let db_status = match db_pool.get() {
+pub async fn health_check(state: web::Data<AppState>) -> impl Responder {
+    info!("Health check endpoint hit.");
+
+    let environment = &state.environment;
+    let db_status = match state.db_pool.get() {
         Ok(mut conn) => match sql_query("SELECT 1").execute(&mut conn) {
             Ok(_) => "connected",
             Err(_) => "disconnected",
@@ -17,12 +16,14 @@ pub async fn health_check(
         Err(_) => "disconnected",
     };
 
+    let uptime = state.start_time.elapsed().as_secs();
+
     HttpResponse::Ok().json({
         serde_json::json!({
             "status": "ok",
             "environment": environment,
             "database": db_status,
-            "uptime": start_time.elapsed().as_secs(),
+            "uptime": uptime,
         })
     })
 }
