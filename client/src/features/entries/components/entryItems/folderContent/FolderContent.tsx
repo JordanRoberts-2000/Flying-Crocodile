@@ -5,9 +5,9 @@ import EntryLink from "../EntryLink";
 import useGetEntries from "../../../hooks/useGetEntries";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
-import useEntryStore from "@/features/entries/store/useEntryStore";
 import { useEffect } from "react";
 import { QueryPath } from "@/features/entries/entryTypes";
+import { useEntryStore } from "@/features/entries/store/EntryStoreProvider";
 
 type Props = {
   queryPath: QueryPath;

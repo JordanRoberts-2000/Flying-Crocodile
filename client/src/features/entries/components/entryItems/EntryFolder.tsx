@@ -2,9 +2,9 @@ import clsx from "clsx";
 import EntryInput from "../EntryInput";
 import Icon from "@/components/Icon";
 import FolderContent from "./folderContent/FolderContent";
-import useEntryStore from "../../store/useEntryStore";
 import { QueryPath } from "../../entryTypes";
 import { getEntryId } from "../../utils/getEntryId";
+import { useEntryStore } from "../../store/EntryStoreProvider";
 
 type Props = {
   title: string;

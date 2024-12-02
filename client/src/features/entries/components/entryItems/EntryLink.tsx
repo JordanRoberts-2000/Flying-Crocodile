@@ -2,9 +2,9 @@ import EntryInput from "../EntryInput";
 import { useRef } from "react";
 import clsx from "clsx";
 import Icon from "@/components/Icon";
-import useEntryStore from "../../store/useEntryStore";
 import { QueryPath } from "../../entryTypes";
 import { getEntryId } from "../../utils/getEntryId";
+import { useEntryStore } from "../../store/EntryStoreProvider";
 
 type Props = {
   queryPath: QueryPath;

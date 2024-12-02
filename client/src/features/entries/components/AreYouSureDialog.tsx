@@ -6,8 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useDeleteEntry from "../hooks/useDeleteEntry";
-import useEntryStore from "../store/useEntryStore";
 import { QueryPath } from "../entryTypes";
+import { useEntryStore } from "../store/EntryStoreProvider";
 
 const AreYouSureDialog = () => {
   const deleteEntry = useDeleteEntry();

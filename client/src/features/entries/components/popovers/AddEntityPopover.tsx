@@ -2,7 +2,7 @@ import { Popover, PopoverContent } from "@/components/ui/popover";
 import Icon from "@/components/Icon";
 import { PopoverAnchor } from "@radix-ui/react-popover";
 import { InputEntryType } from "../../entryTypes";
-import useEntryStore from "../../store/useEntryStore";
+import { useEntryStore } from "../../store/EntryStoreProvider";
 
 type Props = {
   rootId: number;

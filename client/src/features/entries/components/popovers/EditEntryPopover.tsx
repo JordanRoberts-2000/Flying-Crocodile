@@ -3,7 +3,7 @@ import { PopoverAnchor } from "@radix-ui/react-popover";
 import AreYouSureDialog from "../AreYouSureDialog";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import Icon from "@/components/Icon";
-import useEntryStore from "../../store/useEntryStore";
+import { useEntryStore } from "../../store/EntryStoreProvider";
 
 const EditEntityPopover = () => {
   const open = useEntryStore((state) => state.modifyEntry.edit.popoverOpen);

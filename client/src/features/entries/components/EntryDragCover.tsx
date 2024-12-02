@@ -1,4 +1,4 @@
-import useEntryStore from "../store/useEntryStore";
+import { useEntryStore } from "../store/EntryStoreProvider";
 
 const EntryDragCover = ({}) => {
   const { title, isFolder } = useEntryStore(

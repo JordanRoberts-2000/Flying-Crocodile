@@ -30,6 +30,7 @@ export const fetchRootEntry = async (
   );
 
   const { rootId, entries } = data.getRootEntries;
+  console.log(entries, rootId);
   queryClient.setQueryData(["entries", rootId], sortEntries(entries));
 
   return rootId;

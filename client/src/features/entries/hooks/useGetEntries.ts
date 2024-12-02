@@ -29,6 +29,7 @@ const useGetEntries = (queryKey: QueryPath) => {
     enabled: entryId !== undefined && entryId !== -1,
   });
 
+  console.log("uuugh");
   useErrorNotification(
     res.isError,
     `Error getting entries from id: "${entryId}"`

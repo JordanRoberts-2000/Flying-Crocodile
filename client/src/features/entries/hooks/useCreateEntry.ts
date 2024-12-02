@@ -5,8 +5,8 @@ import { createEntry } from "@/features/entries/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
-import useEntryStore from "../store/useEntryStore";
 import { QueryPath } from "../entryTypes";
+import { useEntryStore } from "../store/EntryStoreProvider";
 
 type Variables = {
   newEntry: NewEntry;

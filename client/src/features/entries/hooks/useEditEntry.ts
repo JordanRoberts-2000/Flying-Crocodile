@@ -5,9 +5,9 @@ import { API_BASE_URL } from "@/constants";
 import { Entry } from "@/gql/graphql";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";
-import useEntryStore from "../store/useEntryStore";
 import { getEntryId } from "../utils/getEntryId";
 import { QueryPath } from "../entryTypes";
+import { useEntryStore } from "../store/EntryStoreProvider";
 
 type MutationVariables = {
   queryPath: QueryPath;

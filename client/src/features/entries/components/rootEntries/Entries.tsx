@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import AddEntityPopover from "../popovers/AddEntityPopover";
 import EntryInput from "../EntryInput";
 import { Separator } from "@/components/ui/separator";
-import useGetRootEntries from "../../hooks/useGetRootEntry";
 import EntriesLoading from "./Entries.loading";
 import EntriesError from "./Entries.error";
 import EntriesEmpty from "./Entries.empty";
@@ -11,15 +10,19 @@ import EntryFolder from "../entryItems/EntryFolder";
 import EntryLink from "../entryItems/EntryLink";
 import EditEntityPopover from "../popovers/EditEntryPopover";
 import clsx from "clsx";
-import useEntryStore from "../../store/useEntryStore";
 import useEntryInteractions from "../../hooks/useEntryInteractions";
 import EntryDragCover from "../EntryDragCover";
 import { QueryPath } from "../../entryTypes";
+import { useEntryStore } from "../../store/EntryStoreProvider";
+import { Entry } from "@/gql/graphql";
 
-const Entries = () => {
+type Props = {
+  entries: Entry[];
+  rootId: number;
+};
+
+const Entries = ({ entries, rootId }: Props) => {
   const addPopoverAnchorRef = useRef<HTMLButtonElement | null>(null);
-
-  const { rootId, entries, isError, isPending } = useGetRootEntries("gallery");
 
   const inputType = useEntryStore(
     (state) => state.modifyEntry.add.inputEntryType
@@ -61,9 +64,6 @@ const Entries = () => {
   }, [entries, updateFolderHierarchy]);
 
   const rootHandlers = useEntryInteractions();
-
-  if (isPending) return <EntriesLoading />;
-  if (isError) return <EntriesError />;
 
   const queryPath = ["entries", rootId] as QueryPath;
   return (

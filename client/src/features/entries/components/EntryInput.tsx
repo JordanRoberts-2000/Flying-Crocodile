@@ -3,9 +3,9 @@ import useCreateEntry from "../hooks/useCreateEntry";
 import useUpdateEntry from "../hooks/useEditEntry";
 import { InputEntryType, QueryPath } from "../entryTypes";
 import Icon from "@/components/Icon";
-import useEntryStore from "../store/useEntryStore";
 import clsx from "clsx";
 import { getEntryId, getEntryParentId } from "../utils/getEntryId";
+import { useEntryStore } from "../store/EntryStoreProvider";
 
 type Props = {
   embedLevel: number;

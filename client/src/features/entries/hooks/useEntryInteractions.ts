@@ -1,9 +1,9 @@
-import { useRef } from "react";
-import useEntryStore from "../store/useEntryStore";
+import { useContext, useRef } from "react";
 import useLongPress from "@/hooks/useLongPress";
 // import useMoveEntry from "./useMoveEntry";
 import { InputEntryType, QueryPath } from "../entryTypes";
 import { getEntryId, getEntryParentId } from "../utils/getEntryId";
+import { EntryContext, useEntryStore } from "../store/EntryStoreProvider";
 
 const useEntryInteractions = () => {
   const addAnchorRef = useRef<Element | null>(null);
@@ -87,10 +87,12 @@ const useEntryInteractions = () => {
     setDragCover(entryTitle, entryType === "folder");
   };
 
+  const context = useContext(EntryContext);
+
   const onDragEnd = (e: React.DragEvent) => {
     e.preventDefault();
     isDragging.current = false;
-    useEntryStore.setState((state) => ({
+    context!.setState((state) => ({
       dragging: {
         ...state.dragging,
         entryId: -2,
@@ -123,7 +125,7 @@ const useEntryInteractions = () => {
     const queryPath = getDropAreaData(entry);
     dragOverQueryPath.current = queryPath;
     if (queryPath) {
-      useEntryStore.setState((state) => ({
+      context!.setState((state) => ({
         dragging: {
           ...state.dragging,
           entryId: getEntryId(queryPath),
