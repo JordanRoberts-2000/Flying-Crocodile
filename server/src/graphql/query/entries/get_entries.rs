@@ -2,9 +2,16 @@ use crate::models::Entry;
 use crate::schema::entries::dsl;
 use crate::{db::DbPool, schema::entries};
 use actix_web::web;
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, InputObject, Object, Result};
 use diesel::prelude::*;
 use log::{error, info};
+use validator::Validate;
+
+#[derive(InputObject, Validate)]
+pub struct GetEntriesInput {
+    #[validate(range(min = 1, message = "parent_id must be a positive integer"))]
+    pub parent_id: i32,
+}
 
 #[derive(Default)]
 pub struct EntryQuery;
@@ -14,25 +21,28 @@ impl EntryQuery {
     async fn get_entries(
         &self,
         ctx: &Context<'_>,
-        parent_id: Option<i32>,
+        input: GetEntriesInput,
     ) -> Result<Vec<Entry>, async_graphql::Error> {
         info!(
-            "GraphQL Query: get_entries hit - with parent_id: {:?}",
-            parent_id
+            "GraphQL Query: get_entries hit - with parent_id: {}",
+            input.parent_id
         );
 
-        let parent_id = match parent_id {
-            Some(id) => id,
-            None => {
-                error!("GraphQL Query: get_entries failed - error: parent_id is required but was not provided.");
-                return Err(async_graphql::Error::new("parent_id is required"));
-            }
-        };
+        if let Err(errors) = input.validate() {
+            error!(
+                "GraphQL Query: get_entries validation failed - errors: {:?}",
+                errors
+            );
+            return Err(async_graphql::Error::new(format!(
+                "Validation failed: {:?}",
+                errors
+            )));
+        }
 
         let pool = match ctx.data::<DbPool>() {
             Ok(pool) => pool.clone(),
             Err(_) => {
-                error!("GraphQL Query: get_entries failed for parent_id: {} - error: Failed to get db_pool from context", parent_id);
+                error!("GraphQL Query: get_entries failed for parent_id: {} - error: Failed to get db_pool from context", input.parent_id);
                 return Err(async_graphql::Error::new(
                     "Failed to retrieve database pool from context",
                 ));
@@ -48,7 +58,7 @@ impl EntryQuery {
             })?;
 
             dsl::entries
-                .filter(entries::parent_id.eq(parent_id))
+                .filter(entries::parent_id.eq(input.parent_id))
                 .load::<Entry>(&mut connection)
         })
         .await
@@ -59,7 +69,7 @@ impl EntryQuery {
             Err(err) => {
                 error!(
                     "GraphQL Query: get_entries failed for parent_id: {} - error: {:?}",
-                    parent_id, err
+                    input.parent_id, err
                 );
                 return Err(err.into());
             }
@@ -68,7 +78,7 @@ impl EntryQuery {
         info!(
             "GraphQL Query: get_entries succeeded - fetched {} entries for parent_id: {}",
             entries.len(),
-            parent_id
+            input.parent_id
         );
 
         Ok(entries)
