@@ -106,11 +106,3 @@ async fn main() -> std::io::Result<()> {
 
     server.run().await
 }
-
-// host react files
-// clippy vs rust analyser
-// nodemon for rust
-// how will logs work in railway???
-// better error handling, also .expect vs !fatal()
-// add logs to all routes
-// commit changes

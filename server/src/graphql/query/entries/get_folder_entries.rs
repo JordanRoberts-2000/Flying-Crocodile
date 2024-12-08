@@ -7,6 +7,11 @@ use diesel::prelude::*;
 use log::{error, info};
 use validator::Validate;
 
+// recieve folder id
+// check if string is a existing folder
+// fetch the folders children
+// return data like {folderId: [{id: 3, title: "example", isFolder: true}, ...]}
+
 #[derive(InputObject, Validate)]
 pub struct GetEntriesInput {
     #[validate(range(min = 1, message = "parent_id must be a positive integer"))]
@@ -18,7 +23,7 @@ pub struct EntryQuery;
 
 #[Object]
 impl EntryQuery {
-    async fn get_entries(
+    async fn get_folder_entries(
         &self,
         ctx: &Context<'_>,
         input: GetEntriesInput,

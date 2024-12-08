@@ -3,6 +3,7 @@ use async_graphql::http::GraphiQLSource;
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use schema::AppSchema;
 
+pub mod loaders;
 pub mod mutation;
 pub mod query;
 pub mod schema;

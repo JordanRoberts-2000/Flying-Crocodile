@@ -1,10 +1,11 @@
 use async_graphql::{InputObject, SimpleObject};
 use diesel::prelude::*;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 use crate::schema::entries;
 
-#[derive(Queryable, serde::Serialize, SimpleObject)]
+#[derive(Queryable, serde::Serialize, SimpleObject, Clone, Debug)]
 pub struct Entry {
     pub id: i32,
     pub title: String,
@@ -21,7 +22,7 @@ pub struct NewEntry {
 }
 
 #[derive(SimpleObject)]
-pub struct RootEntry {
+pub struct InitialEntriesResponse {
     pub root_id: i32,
-    pub entries: Vec<Entry>,
+    pub initial_entries: HashMap<i32, Entry>,
 }
