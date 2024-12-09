@@ -1,7 +1,7 @@
 use crate::AppState;
 use async_graphql::{Context, Object, Result};
 use log::{error, info};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Default)]
 pub struct CategoriesQuery;
@@ -11,15 +11,25 @@ impl CategoriesQuery {
     async fn get_categories(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
         info!("CategoriesQuery hit");
 
-        let app_state = match ctx.data::<Arc<AppState>>() {
-            Ok(app_state) => app_state,
-            Err(e) => {
-                error!("Failed to retrieve AppState from context: {:?}", e);
-                return Err(async_graphql::Error::new("Internal server error"));
-            }
-        };
+        let app_state = ctx
+            .data::<Arc<Mutex<AppState>>>()
+            .map_err(|e| {
+                error!("Error - Failed to retrieve AppState from context: {:?}", e);
+                async_graphql::Error::new("Internal server error")
+            })
+            .and_then(|state| {
+                state.lock().map_err(|e| {
+                    error!("Error - Failed to acquire AppState lock: {:?}", e);
+                    async_graphql::Error::new("Internal server error")
+                })
+            })?;
 
         let categories = app_state.root_manager.get_categories();
+
+        info!(
+            "CategoriesQuery Successful - fetched {} categories",
+            categories.len()
+        );
 
         Ok(categories)
     }

@@ -4,9 +4,13 @@ use db::{get_connection_pool, DbPool};
 use dotenv::dotenv;
 use graphql::{graphql_handler, index_graphiql, schema::create_schema};
 use log::{error, info, warn};
-use managers::root::RootManager;
+use managers::{folder::FolderManager, root::RootManager};
 use routes::health::health_check;
-use std::{env, sync::Arc, time::Instant};
+use std::{
+    env,
+    sync::{Arc, Mutex},
+    time::Instant,
+};
 
 mod db;
 mod graphql;
@@ -14,11 +18,16 @@ mod managers;
 mod models;
 mod routes;
 mod schema;
-pub struct AppState {
-    pub db_pool: DbPool,
+
+pub struct AppConfig {
     pub start_time: Instant,
     pub environment: String,
+}
+pub struct AppState {
+    pub db_pool: DbPool,
     pub root_manager: RootManager,
+    pub folder_manager: FolderManager,
+    pub config: AppConfig,
 }
 
 #[actix_web::main]
@@ -55,6 +64,8 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let folder_manager = FolderManager::new(&db_pool);
+
     let mut root_manager = RootManager::new(&db_pool);
     match root_manager.initialize() {
         Ok(_) => {
@@ -72,28 +83,35 @@ async fn main() -> std::io::Result<()> {
         info!("CORS: Default configuration (production mode)");
     }
 
-    let app_state = Arc::new(AppState {
+    let app_state = Arc::new(Mutex::new(AppState {
         db_pool,
-        start_time: Instant::now(),
-        environment,
         root_manager,
-    });
+        folder_manager,
+        config: AppConfig {
+            start_time: Instant::now(),
+            environment,
+        },
+    }));
 
     let schema = create_schema(app_state.clone());
     info!("GraphQL schema is ready to use");
 
     let server = HttpServer::new(move || {
-        let cors = if app_state.environment.clone() == "development" {
-            Cors::default()
-                .allow_any_origin()
-                .allow_any_method()
-                .allow_any_header()
-        } else {
-            Cors::default()
-        };
+        let cors_config;
+        {
+            let app_state = app_state.lock().unwrap();
+            cors_config = if app_state.config.environment == "development" {
+                Cors::default()
+                    .allow_any_origin()
+                    .allow_any_method()
+                    .allow_any_header()
+            } else {
+                Cors::default()
+            };
+        }
 
         App::new()
-            .wrap(cors)
+            .wrap(cors_config)
             .app_data(web::Data::new(schema.clone()))
             .app_data(web::Data::new(app_state.clone()))
             .service(
