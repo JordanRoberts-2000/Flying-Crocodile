@@ -1,2 +1,2 @@
-pub mod get_initial_entires;
-// pub mod get_folder_entries;
+pub mod get_categories;
+pub mod get_folder_entries;

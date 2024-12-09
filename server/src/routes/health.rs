@@ -1,10 +1,11 @@
 use actix_web::{web, HttpResponse, Responder};
 use diesel::{dsl::sql_query, RunQueryDsl};
 use log::info;
+use std::sync::Arc;
 
 use crate::AppState;
 
-pub async fn health_check(state: web::Data<AppState>) -> impl Responder {
+pub async fn health_check(state: web::Data<Arc<AppState>>) -> impl Responder {
     info!("Health check endpoint hit.");
 
     let environment = &state.environment;

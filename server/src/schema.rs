@@ -5,6 +5,7 @@ diesel::table! {
         id -> Int4,
         title -> Varchar,
         parent_id -> Nullable<Int4>,
+        root_id -> Nullable<Int4>,
         is_folder -> Bool,
     }
 }

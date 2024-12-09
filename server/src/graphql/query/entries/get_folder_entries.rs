@@ -1,41 +1,43 @@
-use crate::models::Entry;
+use crate::models::{Entry, FolderQueryInput, FolderQueryResponse, MinimalEntry};
 use crate::schema::entries::dsl;
-use crate::{db::DbPool, schema::entries};
-use actix_web::web;
-use async_graphql::{Context, InputObject, Object, Result};
+use crate::AppState;
+use async_graphql::{Context, Object, Result};
 use diesel::prelude::*;
 use log::{error, info};
+use std::sync::Arc;
 use validator::Validate;
 
-// recieve folder id
-// check if string is a existing folder
-// fetch the folders children
-// return data like {folderId: [{id: 3, title: "example", isFolder: true}, ...]}
-
-#[derive(InputObject, Validate)]
-pub struct GetEntriesInput {
-    #[validate(range(min = 1, message = "parent_id must be a positive integer"))]
-    pub parent_id: i32,
-}
-
 #[derive(Default)]
-pub struct EntryQuery;
+pub struct FolderQuery;
 
 #[Object]
-impl EntryQuery {
+impl FolderQuery {
     async fn get_folder_entries(
         &self,
         ctx: &Context<'_>,
-        input: GetEntriesInput,
-    ) -> Result<Vec<Entry>, async_graphql::Error> {
+        input: FolderQueryInput,
+    ) -> Result<FolderQueryResponse> {
         info!(
-            "GraphQL Query: get_entries hit - with parent_id: {}",
-            input.parent_id
+            "FolderQuery hit - with root: {}, and folder id: {:?}",
+            input.root_title, input.folder_id
         );
+
+        let app_state = match ctx.data::<Arc<AppState>>() {
+            Ok(app_state) => app_state,
+            Err(e) => {
+                error!(
+                    "FolderQuery Error - Failed to retrieve AppState from context: {:?}",
+                    e
+                );
+                return Err(async_graphql::Error::new("Internal server error"));
+            }
+        };
+
+        let pool = app_state.db_pool.clone();
 
         if let Err(errors) = input.validate() {
             error!(
-                "GraphQL Query: get_entries validation failed - errors: {:?}",
+                "FolderQuery Error - Validation failed for FolderQueryInput: {:?}",
                 errors
             );
             return Err(async_graphql::Error::new(format!(
@@ -44,48 +46,101 @@ impl EntryQuery {
             )));
         }
 
-        let pool = match ctx.data::<DbPool>() {
-            Ok(pool) => pool.clone(),
-            Err(_) => {
-                error!("GraphQL Query: get_entries failed for parent_id: {} - error: Failed to get db_pool from context", input.parent_id);
-                return Err(async_graphql::Error::new(
-                    "Failed to retrieve database pool from context",
-                ));
-            }
-        };
-
-        let entries_result = web::block(move || {
-            let mut connection = pool.get().map_err(|e| {
-                diesel::result::Error::DatabaseError(
-                    diesel::result::DatabaseErrorKind::UnableToSendCommand,
-                    Box::new(format!("Connection error: {}", e)),
-                )
+        let (folder_id, entries): (i32, Vec<MinimalEntry>) = {
+            let mut conn = pool.get().map_err(|e| {
+                error!(
+                    "FolderQuery Error - Failed to get DB connection from pool: {}",
+                    e
+                );
+                async_graphql::Error::new("Database connection error")
             })?;
 
-            dsl::entries
-                .filter(entries::parent_id.eq(input.parent_id))
-                .load::<Entry>(&mut connection)
-        })
-        .await
-        .map_err(|_| async_graphql::Error::new("Database operation failed"))?;
+            if let Some(folder_id) = input.folder_id {
+                let is_folder_exists = dsl::entries
+                    .filter(dsl::id.eq(folder_id))
+                    .filter(dsl::is_folder.eq(true))
+                    .count()
+                    .get_result::<i64>(&mut conn)
+                    .map_err(|e| {
+                        error!(
+                            "FolderQuery Error - Failed to query folder_id {}: {}",
+                            folder_id, e
+                        );
+                        async_graphql::Error::new("Failed to validate folder_id")
+                    })?;
 
-        let entries = match entries_result {
-            Ok(entries) => entries,
-            Err(err) => {
-                error!(
-                    "GraphQL Query: get_entries failed for parent_id: {} - error: {:?}",
-                    input.parent_id, err
-                );
-                return Err(err.into());
+                if is_folder_exists == 0 {
+                    error!(
+                        "FolderQuery Error - Folder with ID {} does not exist",
+                        folder_id
+                    );
+                    return Err(async_graphql::Error::new(format!(
+                        "Folder with ID {} not found",
+                        folder_id
+                    )));
+                }
+
+                let entries = dsl::entries
+                    .filter(dsl::parent_id.eq(folder_id))
+                    .load::<Entry>(&mut conn)
+                    .map_err(|e| {
+                        error!(
+                            "FolderQuery Error - Failed to query entries for folder_id {}: {}",
+                            folder_id, e
+                        );
+                        async_graphql::Error::new("Failed to retrieve entries")
+                    })?
+                    .into_iter()
+                    .map(|entry| MinimalEntry {
+                        id: entry.id,
+                        title: entry.title,
+                        is_folder: entry.is_folder,
+                    })
+                    .collect();
+
+                (folder_id, entries)
+            } else {
+                let root_id = dsl::entries
+                    .filter(dsl::title.eq(&input.root_title))
+                    .filter(dsl::parent_id.is_null())
+                    .select(dsl::id)
+                    .get_result::<i32>(&mut conn)
+                    .map_err(|e| {
+                        error!(
+                            "FolderQuery Error - Failed to query entries for root_title '{}': {}",
+                            input.root_title, e
+                        );
+                        async_graphql::Error::new("Failed to retrieve entries")
+                    })?;
+
+                let entries = dsl::entries
+                    .filter(dsl::parent_id.eq(Some(root_id)))
+                    .load::<Entry>(&mut conn)
+                    .map_err(|e| {
+                        error!(
+                            "FolderQuery Error - Failed to query entries for root_id {}: {}",
+                            root_id, e
+                        );
+                        async_graphql::Error::new("Failed to retrieve entries")
+                    })?
+                    .into_iter()
+                    .map(|entry| MinimalEntry {
+                        id: entry.id,
+                        title: entry.title,
+                        is_folder: entry.is_folder,
+                    })
+                    .collect();
+
+                (root_id, entries)
             }
         };
 
         info!(
-            "GraphQL Query: get_entries succeeded - fetched {} entries for parent_id: {}",
+            "FolderQuery Successful - fetched {} entries for folder_id {:?}",
             entries.len(),
-            input.parent_id
+            folder_id
         );
 
-        Ok(entries)
+        Ok(FolderQueryResponse { folder_id, entries })
     }
 }

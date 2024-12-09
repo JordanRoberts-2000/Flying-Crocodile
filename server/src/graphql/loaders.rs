@@ -37,3 +37,11 @@ impl Loader<i32> for EntryLoader {
         Ok(grouped_entries)
     }
 }
+
+// let loader = ctx.data::<DataLoader<EntryLoader>>()?;
+// let entries_result = loader.load_one(root_id).await.map_err(|e| {
+//     async_graphql::Error::new(format!(
+//         "Failed to load entries for parent_id {}: {}",
+//         root_id, e
+//     ))
+// })?;

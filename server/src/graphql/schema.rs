@@ -1,14 +1,15 @@
-use crate::db::DbPool;
+use crate::AppState;
 use async_graphql::{dataloader::DataLoader, EmptySubscription, Schema};
+use std::sync::Arc;
 
 use super::{loaders::EntryLoader, mutation::RootMutation, query::RootQuery};
 
 pub type AppSchema = Schema<RootQuery, RootMutation, EmptySubscription>;
 
-pub fn create_schema(db_pool: &DbPool) -> AppSchema {
+pub fn create_schema(app_state: Arc<AppState>) -> AppSchema {
     let entry_loader = DataLoader::new(
         EntryLoader {
-            db_pool: db_pool.clone(),
+            db_pool: app_state.db_pool.clone(),
         },
         tokio::spawn,
     );
@@ -18,7 +19,7 @@ pub fn create_schema(db_pool: &DbPool) -> AppSchema {
         RootMutation::default(),
         EmptySubscription,
     )
-    .data(db_pool.clone())
+    .data(app_state)
     .data(entry_loader)
     .finish()
 }

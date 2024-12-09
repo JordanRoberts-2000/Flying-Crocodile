@@ -4,27 +4,28 @@ use db::{get_connection_pool, DbPool};
 use dotenv::dotenv;
 use graphql::{graphql_handler, index_graphiql, schema::create_schema};
 use log::{error, info, warn};
+use managers::root::RootManager;
 use routes::health::health_check;
-use std::{env, time::Instant};
-use utils::ensure_root_folders::ensure_root_folders;
+use std::{env, sync::Arc, time::Instant};
 
 mod db;
 mod graphql;
+mod managers;
 mod models;
 mod routes;
 mod schema;
-mod utils;
-
 pub struct AppState {
     pub db_pool: DbPool,
     pub start_time: Instant,
     pub environment: String,
+    pub root_manager: RootManager,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    env_logger::init();
+
+    env_logger::builder().format_timestamp(None).init();
 
     let environment = match env::var("ENVIRONMENT") {
         Ok(value) => value,
@@ -43,8 +44,6 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let start_time = Instant::now();
-
     let db_pool = match get_connection_pool() {
         Ok(pool) => {
             info!("Application successfully connected to the database");
@@ -56,38 +55,47 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    match ensure_root_folders(&db_pool) {
-        Ok(_) => info!("Root folders setup."),
+    let mut root_manager = RootManager::new(&db_pool);
+    match root_manager.initialize() {
+        Ok(_) => {
+            info!("Root folders initialized successfully.");
+        }
         Err(err) => {
-            error!("Failed to setup root folders: {}", err);
+            error!("Failed to initialize root folders: {}", err);
             std::process::exit(1);
         }
+    };
+
+    if environment == "development" {
+        info!("CORS: Allowing any origin (development mode)");
+    } else {
+        info!("CORS: Default configuration (production mode)");
     }
 
-    let schema = create_schema(&db_pool);
-    info!("GraphQL schema is ready to use");
-
-    let app_state = web::Data::new(AppState {
+    let app_state = Arc::new(AppState {
         db_pool,
-        start_time,
+        start_time: Instant::now(),
         environment,
+        root_manager,
     });
 
+    let schema = create_schema(app_state.clone());
+    info!("GraphQL schema is ready to use");
+
     let server = HttpServer::new(move || {
-        let cors = if app_state.environment == "development" {
-            info!("CORS: Allowing any origin (development mode)");
+        let cors = if app_state.environment.clone() == "development" {
             Cors::default()
                 .allow_any_origin()
                 .allow_any_method()
                 .allow_any_header()
         } else {
-            info!("CORS: Default configuration (production mode)");
             Cors::default()
         };
+
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(schema.clone()))
-            .app_data(app_state.clone())
+            .app_data(web::Data::new(app_state.clone()))
             .service(
                 web::resource("/graphql")
                     .guard(guard::Post())
