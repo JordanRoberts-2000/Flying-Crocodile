@@ -1,4 +1,4 @@
-use log::info;
+use log::{debug, info};
 
 use super::RootManager;
 
@@ -18,6 +18,9 @@ impl RootManager {
                 }
             }
         }
+
+        debug!("Cache state after initialization: {:#?}", self.cache);
+
         Ok(())
     }
 }

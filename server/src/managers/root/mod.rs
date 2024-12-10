@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{db::DbPool, models::Entry};
+use crate::db::DbPool;
 
 mod check_exists;
 mod create_root;
@@ -13,7 +13,7 @@ mod root_cache;
 
 pub struct RootManager {
     pub db_pool: DbPool,
-    pub cache: HashMap<String, Entry>,
+    pub cache: HashMap<String, i32>,
 }
 
 impl RootManager {

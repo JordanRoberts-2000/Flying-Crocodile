@@ -18,6 +18,7 @@ mod managers;
 mod models;
 mod routes;
 mod schema;
+pub mod utils;
 
 pub struct AppConfig {
     pub start_time: Instant,
@@ -34,7 +35,11 @@ pub struct AppState {
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
-    env_logger::builder().format_timestamp(None).init();
+    env_logger::builder()
+        .format_module_path(false)
+        .format_target(false)
+        .format_timestamp(None)
+        .init();
 
     let environment = match env::var("ENVIRONMENT") {
         Ok(value) => value,

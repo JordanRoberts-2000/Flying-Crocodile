@@ -3,7 +3,7 @@ use crate::{
     schema::entries,
 };
 use diesel::prelude::*;
-use log::info;
+use log::debug;
 
 use super::RootManager;
 
@@ -40,15 +40,14 @@ impl RootManager {
                 )
             })?;
 
-        self.cache
-            .insert(inserted_entry.title.clone(), inserted_entry.clone());
+        self.add_to_cache(&inserted_entry);
 
-        info!(
+        debug!(
             "Root folder `{}` created successfully with ID {}.",
             root_name, inserted_entry.id
         );
 
-        let index_name = format!("idx_entries_by_root_and_parent_id_{}", inserted_entry.id);
+        let index_name = format!("idx_entries_by_root_id_{}", inserted_entry.id);
         let create_index_query = format!(
             "CREATE INDEX {} ON entries (parent_id) WHERE root_id = {};",
             index_name, inserted_entry.id
@@ -63,7 +62,7 @@ impl RootManager {
                 )
             })?;
 
-        info!(
+        debug!(
             "Index `{}` created successfully for root ID {}.",
             index_name, inserted_entry.id
         );
