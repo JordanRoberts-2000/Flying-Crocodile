@@ -18,6 +18,7 @@ use routes::health::health_check;
 use std::env;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
+use utils::setup_limiter::setup_limiter;
 
 pub struct AppConfig {
     pub start_time: Instant,
@@ -74,6 +75,9 @@ pub fn initialize_app() -> Arc<Mutex<AppState>> {
 
 pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
     let schema = create_schema(app_state.clone());
+
+    let rate_limiter = setup_limiter();
+
     let environment;
     {
         let app_state = app_state.lock().unwrap();
@@ -91,6 +95,7 @@ pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
         };
 
         App::new()
+            .wrap(rate_limiter.clone())
             .wrap(cors_config)
             .app_data(web::Data::new(schema.clone()))
             .app_data(web::Data::new(app_state.clone()))
