@@ -7,7 +7,7 @@ use actix_governor::{
 };
 use actix_web::{dev::ServiceRequest, http::header::ContentType};
 use log::{error, warn};
-use std::{convert::Infallible, env, sync::Arc};
+use std::{convert::Infallible, env, sync::Arc, time::Duration};
 
 // Global rate limiting, instead of per ip
 #[derive(Clone, Debug)]
@@ -54,7 +54,7 @@ pub fn setup_limiter() -> Arc<Governor<GlobalKeyExtractor, NoOpMiddleware>> {
 
     Arc::new(Governor::new(
         &GovernorConfigBuilder::default()
-            .seconds_per_request((limit / (60 * 60 * 24)).into())
+            .const_period(Duration::from_secs(86_400)) // 1 day = 86,400 seconds
             .burst_size(limit)
             .key_extractor(GlobalKeyExtractor)
             .finish()
