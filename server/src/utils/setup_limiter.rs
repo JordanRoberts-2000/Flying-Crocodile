@@ -1,12 +1,46 @@
 use actix_governor::{
-    governor::middleware::NoOpMiddleware, Governor, GovernorConfigBuilder, PeerIpKeyExtractor,
+    governor::{
+        clock::{Clock, DefaultClock},
+        middleware::NoOpMiddleware,
+    },
+    Governor, GovernorConfigBuilder, KeyExtractor,
 };
-use log::warn;
-use std::env;
-use std::sync::Arc;
+use actix_web::{dev::ServiceRequest, http::header::ContentType};
+use log::{error, warn};
+use std::{convert::Infallible, env, sync::Arc};
 
-pub fn setup_limiter() -> Arc<Governor<PeerIpKeyExtractor, NoOpMiddleware>> {
-    // Fetch the rate limit from the environment or use a default value
+// Global rate limiting, instead of per ip
+#[derive(Clone, Debug)]
+pub struct GlobalKeyExtractor;
+
+impl KeyExtractor for GlobalKeyExtractor {
+    type Key = String;
+    type KeyExtractionError = Infallible;
+
+    fn extract(&self, _req: &ServiceRequest) -> Result<Self::Key, Self::KeyExtractionError> {
+        Ok("global_key".to_string())
+    }
+
+    fn exceed_rate_limit_response(
+        &self,
+        negative: &actix_governor::governor::NotUntil<
+            actix_governor::governor::clock::QuantaInstant,
+        >,
+        mut response: actix_web::HttpResponseBuilder,
+    ) -> actix_web::HttpResponse {
+        let wait_time = negative
+            .wait_time_from(DefaultClock::default().now())
+            .as_secs();
+        error!("Rate limit exceeded");
+
+        response
+            .status(actix_web::http::StatusCode::TOO_MANY_REQUESTS)
+            .content_type(ContentType::plaintext())
+            .body(format!("Too many requests, retry in {}s", wait_time))
+    }
+}
+
+pub fn setup_limiter() -> Arc<Governor<GlobalKeyExtractor, NoOpMiddleware>> {
     let limit = match env::var("RATE_LIMIT") {
         Ok(value) => value.parse::<u32>().unwrap_or_else(|_| {
             warn!("RATE_LIMIT env variable was invalid, defaulting to '1000'");
@@ -18,11 +52,11 @@ pub fn setup_limiter() -> Arc<Governor<PeerIpKeyExtractor, NoOpMiddleware>> {
         }
     };
 
-    // Configure the Governor rate limiter
     Arc::new(Governor::new(
         &GovernorConfigBuilder::default()
-            .seconds_per_request((limit / (60 * 60 * 24)).into()) // Convert daily limit to per-second limit
-            .burst_size(limit) // Allow bursts up to the daily limit
+            .seconds_per_request((limit / (60 * 60 * 24)).into())
+            .burst_size(limit)
+            .key_extractor(GlobalKeyExtractor)
             .finish()
             .expect("Failed to configure rate limiter"),
     ))
