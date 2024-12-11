@@ -4,8 +4,8 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use schema::AppSchema;
 
 pub mod loaders;
-pub mod mutation;
-pub mod query;
+pub mod mutations;
+pub mod queries;
 pub mod schema;
 
 pub async fn graphql_handler(schema: web::Data<AppSchema>, req: GraphQLRequest) -> GraphQLResponse {

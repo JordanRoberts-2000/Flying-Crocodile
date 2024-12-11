@@ -1459,6 +1459,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "my_project"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-web",
+ "async-graphql",
+ "async-graphql-actix-web",
+ "diesel",
+ "dotenv",
+ "env_logger",
+ "log",
+ "serde",
+ "serde_json",
+ "tokio",
+ "validator",
+]
+
+[[package]]
 name = "num-conv"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1749,24 +1767,6 @@ name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
-
-[[package]]
-name = "rust"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-web",
- "async-graphql",
- "async-graphql-actix-web",
- "diesel",
- "dotenv",
- "env_logger",
- "log",
- "serde",
- "serde_json",
- "tokio",
- "validator",
-]
 
 [[package]]
 name = "rustc-demangle"

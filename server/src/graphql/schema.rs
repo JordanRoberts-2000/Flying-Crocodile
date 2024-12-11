@@ -2,7 +2,7 @@ use crate::AppState;
 use async_graphql::{dataloader::DataLoader, EmptySubscription, Schema};
 use std::sync::{Arc, Mutex};
 
-use super::{loaders::EntryLoader, mutation::RootMutation, query::RootQuery};
+use super::{loaders::EntryLoader, mutations::RootMutation, queries::RootQuery};
 
 pub type AppSchema = Schema<RootQuery, RootMutation, EmptySubscription>;
 
