@@ -1,6 +1,6 @@
 pub mod db;
 pub mod graphql;
-mod managers;
+pub mod managers;
 mod models;
 mod routes;
 mod schema;

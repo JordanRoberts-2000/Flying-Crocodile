@@ -1,57 +1,51 @@
-use actix_web::{test, web, App};
-use my_project::{
-    graphql::{graphql_handler, schema::create_schema},
-    initialize_app,
-};
+use async_graphql::{Request, Variables};
+use my_project::{graphql::schema::create_schema, initialize_app};
 use serde_json::json;
 
-#[actix_web::test]
+use crate::helper_functions::db_reset;
+
+#[tokio::test]
 async fn test_create_root_mutation() {
     dotenv::from_filename(".env.test").ok();
+    db_reset(|| {
+        Box::pin(async {
+            let app_state = initialize_app();
+            let schema = create_schema(app_state.clone());
 
-    let app_state = initialize_app();
+            let mutation = Request::new(
+                "mutation CreateRoot($title: String!) {
+                    createRoot(newRootTitle: $title) {
+                        id
+                        title
+                        parentId
+                        rootId
+                        isFolder
+                    }
+                }",
+            )
+            .variables(Variables::from_json(json!({
+                "title": "new category"
+            })));
 
-    let schema = create_schema(app_state.clone());
+            let response = schema.execute(mutation).await;
 
-    let app = test::init_service(
-        App::new()
-            .app_data(web::Data::new(schema.clone()))
-            .route("/graphql", web::post().to(graphql_handler)),
-    )
+            assert!(
+                response.errors.is_empty(),
+                "Expected no errors, but found: {:?}",
+                response.errors
+            );
+
+            let data = response
+                .data
+                .into_json()
+                .expect("Failed to parse response data");
+            let created_entry = data.get("createRoot").expect("Missing createRoot field");
+
+            assert_eq!(
+                created_entry["title"], "new category",
+                "The created entry title does not match"
+            );
+        })
+    })
     .await;
-
-    let mutation = json!({
-        "query": "mutation CreateRoot($title: String!) {
-          createRoot(newRootTitle: $title) {
-              id
-              title
-              parentId
-              rootId
-              isFolder
-          }
-      }",
-        "variables": {
-            "title": "New Category"
-        }
-    });
-
-    let req = test::TestRequest::post()
-        .uri("/graphql")
-        .set_json(&mutation)
-        .to_request();
-
-    let resp = test::call_service(&app, req).await;
-
-    assert!(
-        resp.status().is_success(),
-        "Response status was not successful"
-    );
-
-    let body: serde_json::Value = test::read_body_json(resp).await;
-
-    assert!(
-        body.get("errors").is_none(),
-        "Expected no errors, but found: {:?}",
-        body.get("errors")
-    );
 }
