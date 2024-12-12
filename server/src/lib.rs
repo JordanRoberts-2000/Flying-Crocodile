@@ -12,7 +12,7 @@ use actix_web::{web, App, HttpServer};
 use db::{get_connection_pool, DbPool};
 use graphql::schema::create_schema;
 use graphql::{graphql_handler, index_graphiql};
-use log::{error, warn};
+use log::{debug, error, warn};
 use managers::{folder::FolderManager, root::RootManager};
 use routes::health::health_check;
 use std::env;
@@ -74,6 +74,21 @@ pub fn initialize_app() -> Arc<Mutex<AppState>> {
 }
 
 pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
+    let port: u16 = match env::var("PORT") {
+        Ok(value) => match value.parse::<u16>() {
+            Ok(parsed_port) => parsed_port,
+            Err(_) => {
+                warn!("Invalid PORT value in .env, defaulting to '3000'");
+                3000
+            }
+        },
+        Err(_) => {
+            warn!("PORT not set in .env, defaulting to '3000'");
+            3000
+        }
+    };
+    debug!("Port used: {port}");
+
     let schema = create_schema(app_state.clone());
 
     let rate_limiter = setup_limiter();
@@ -103,7 +118,7 @@ pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
             .route("/graphql", web::post().to(graphql_handler))
             .route("/health", web::get().to(health_check))
     })
-    .bind(("0.0.0.0", 3000))
+    .bind(("0.0.0.0", port))
     .unwrap_or_else(|err| {
         error!("Failed to bind server to address: {}", err);
         std::process::exit(1);
