@@ -16,7 +16,7 @@ use log::{debug, error, warn};
 use managers::{folder::FolderManager, root::RootManager};
 use routes::health::health_check;
 use std::env;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Instant;
 use utils::setup_limiter::setup_limiter;
 
@@ -31,7 +31,7 @@ pub struct AppState {
     pub config: AppConfig,
 }
 
-pub fn initialize_app() -> Arc<Mutex<AppState>> {
+pub fn initialize_app() -> Arc<AppState> {
     env_logger::builder()
         .format_module_path(false)
         .format_target(false)
@@ -62,7 +62,7 @@ pub fn initialize_app() -> Arc<Mutex<AppState>> {
         std::process::exit(1);
     }
 
-    Arc::new(Mutex::new(AppState {
+    Arc::new(AppState {
         db_pool,
         root_manager,
         folder_manager,
@@ -70,10 +70,10 @@ pub fn initialize_app() -> Arc<Mutex<AppState>> {
             start_time: Instant::now(),
             environment,
         },
-    }))
+    })
 }
 
-pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
+pub fn create_server(app_state: Arc<AppState>) -> Server {
     let port: u16 = match env::var("PORT") {
         Ok(value) => match value.parse::<u16>() {
             Ok(parsed_port) => parsed_port,
@@ -89,15 +89,11 @@ pub fn create_server(app_state: Arc<Mutex<AppState>>) -> Server {
     };
     debug!("Port used: {port}");
 
-    let schema = create_schema(app_state.clone());
+    let schema = create_schema(&app_state);
 
     let rate_limiter = setup_limiter();
 
-    let environment;
-    {
-        let app_state = app_state.lock().unwrap();
-        environment = app_state.config.environment.clone();
-    }
+    let environment = app_state.config.environment.clone();
 
     HttpServer::new(move || {
         let cors_config = if environment == "development" {

@@ -1,5 +1,4 @@
-use crate::models::Entry;
-use crate::utils::get_app_state::get_app_state;
+use crate::{models::Entry, utils::get_app_state::get_app_state};
 use async_graphql::{Context, Object, Result};
 use log::{error, info};
 use std::time::Instant;
@@ -16,7 +15,7 @@ impl EntryRootMutation {
             new_root_title
         );
 
-        let mut app_state = get_app_state(ctx, "CreateRootMutation")?;
+        let app_state = get_app_state(ctx, "CreateRootMutation")?;
 
         let result = app_state
             .root_manager

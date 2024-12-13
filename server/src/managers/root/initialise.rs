@@ -9,7 +9,7 @@ impl RootManager {
         for folder in &root_folders {
             match self.get_root(folder) {
                 Ok(entry) => {
-                    self.add_to_cache(&entry);
+                    self.add_to_cache(&entry)?;
                 }
                 Err(_) => {
                     self.create_root(folder)

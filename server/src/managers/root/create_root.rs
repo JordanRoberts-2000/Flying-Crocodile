@@ -8,7 +8,7 @@ use log::debug;
 use super::RootManager;
 
 impl RootManager {
-    pub fn create_root(&mut self, root_name: &str) -> Result<Entry, String> {
+    pub fn create_root(&self, root_name: &str) -> Result<Entry, String> {
         let mut connection = self.db_pool.get().map_err(|e| {
             format!(
                 "Failed to get DB connection from pool while creating entry `{}`: {}",
@@ -40,7 +40,7 @@ impl RootManager {
                 )
             })?;
 
-        self.add_to_cache(&inserted_entry);
+        self.add_to_cache(&inserted_entry)?;
 
         debug!(
             "Root folder `{}` created successfully with ID {}.",

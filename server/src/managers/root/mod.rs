@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use crate::db::DbPool;
 
@@ -13,14 +16,14 @@ mod root_cache;
 
 pub struct RootManager {
     pub db_pool: DbPool,
-    pub cache: HashMap<String, i32>,
+    pub cache: Arc<Mutex<HashMap<String, i32>>>,
 }
 
 impl RootManager {
     pub fn new(db_pool: &DbPool) -> Self {
         Self {
             db_pool: db_pool.clone(),
-            cache: HashMap::new(),
+            cache: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }

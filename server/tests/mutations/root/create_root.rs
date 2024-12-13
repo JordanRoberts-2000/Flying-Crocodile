@@ -10,7 +10,7 @@ async fn test_create_root_mutation() {
     db_reset(|| {
         Box::pin(async {
             let app_state = initialize_app();
-            let schema = create_schema(app_state.clone());
+            let schema = create_schema(&app_state);
 
             let mutation = Request::new(
                 "mutation CreateRoot($title: String!) {
