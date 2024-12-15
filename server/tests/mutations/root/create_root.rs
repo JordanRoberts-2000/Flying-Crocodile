@@ -1,5 +1,5 @@
 use async_graphql::{Request, Variables};
-use my_project::{graphql::schema::create_schema, initialize_app};
+use my_project::{graphql::create_schema::create_schema, state::AppState};
 use serde_json::json;
 
 use crate::helper_functions::db_reset;
@@ -9,7 +9,7 @@ async fn test_create_root_mutation() {
     dotenv::from_filename(".env.test").ok();
     db_reset(|| {
         Box::pin(async {
-            let app_state = initialize_app();
+            let app_state = AppState::initialize();
             let schema = create_schema(&app_state);
 
             let mutation = Request::new(

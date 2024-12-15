@@ -1,11 +1,11 @@
-use crate::{models::Entry, schema::entries};
+use crate::{models::Entry, schema::entries, state::AppState};
 use diesel::prelude::*;
 
-use super::RootManager;
+use super::RootService;
 
-impl RootManager {
-    pub fn get_root(&self, folder_name: &str) -> Result<Entry, String> {
-        let mut connection = self.db_pool.get().map_err(|e| {
+impl RootService {
+    pub fn get_root(app_state: &AppState, folder_name: &str) -> Result<Entry, String> {
+        let mut connection = app_state.db_pool.get().map_err(|e| {
             format!(
                 "Failed to get DB connection from pool while retrieving root `{}`: {}",
                 folder_name, e

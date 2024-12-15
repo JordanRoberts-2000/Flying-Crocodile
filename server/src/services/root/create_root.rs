@@ -1,15 +1,16 @@
 use crate::{
     models::{Entry, NewEntry},
     schema::entries,
+    state::AppState,
 };
 use diesel::prelude::*;
 use log::debug;
 
-use super::RootManager;
+use super::RootService;
 
-impl RootManager {
-    pub fn create_root(&self, root_name: &str) -> Result<Entry, String> {
-        let mut connection = self.db_pool.get().map_err(|e| {
+impl RootService {
+    pub fn create_root(app_state: &AppState, root_name: &str) -> Result<Entry, String> {
+        let mut connection = app_state.db_pool.get().map_err(|e| {
             format!(
                 "Failed to get DB connection from pool while creating entry `{}`: {}",
                 root_name, e
@@ -40,7 +41,7 @@ impl RootManager {
                 )
             })?;
 
-        self.add_to_cache(&inserted_entry)?;
+        Self::add_to_cache(&app_state, &inserted_entry)?;
 
         debug!(
             "Root folder `{}` created successfully with ID {}.",

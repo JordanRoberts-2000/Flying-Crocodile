@@ -1,12 +1,13 @@
+use crate::db::DbPool;
 use crate::models::Entry;
 use crate::schema::entries::dsl::{entries, parent_id, title};
 use diesel::prelude::*;
 
-use super::RootManager;
+use super::RootService;
 
-impl RootManager {
-    pub fn check_exists(&self, root_name: &str) -> Result<bool, String> {
-        let mut connection = self.db_pool.get().map_err(|e| {
+impl RootService {
+    pub fn check_exists(db_pool: &DbPool, root_name: &str) -> Result<bool, String> {
+        let mut connection = db_pool.get().map_err(|e| {
             format!(
                 "Failed to get DB connection from pool while checking entry `{}`: {}",
                 root_name, e

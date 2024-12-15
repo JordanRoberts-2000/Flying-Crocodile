@@ -1,12 +1,12 @@
 use actix_web::{web, HttpResponse, Result};
 use async_graphql::http::GraphiQLSource;
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
-use schema::AppSchema;
+use create_schema::AppSchema;
 
+pub mod create_schema;
 pub mod loaders;
 pub mod mutations;
 pub mod queries;
-pub mod schema;
 
 pub async fn graphql_handler(schema: web::Data<AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
