@@ -26,13 +26,7 @@ impl RootService {
 
         let inserted_entry: Entry = diesel::insert_into(entries::table)
             .values(&new_entry)
-            .returning((
-                entries::id,
-                entries::title,
-                entries::parent_id,
-                entries::root_id,
-                entries::is_folder,
-            ))
+            .returning(entries::all_columns)
             .get_result(&mut connection)
             .map_err(|e| {
                 format!(

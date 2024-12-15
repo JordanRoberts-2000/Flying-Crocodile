@@ -22,14 +22,12 @@ async fn test_create_root_mutation() {
                 }
             }";
 
-            // Helper function to create a request with variables
             let create_request = |title: &str| {
                 Request::new(mutation_query).variables(Variables::from_json(json!({
                     "title": title
                 })))
             };
 
-            // First Mutation
             let first_response = schema.execute(create_request("new title")).await;
 
             assert!(
