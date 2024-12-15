@@ -1,5 +1,5 @@
 test:
-	cargo test --test mod --quiet
+	RUST_TEST_THREADS=1 cargo test --test mod --quiet
 reset:
 	@read -p "Are you sure you want to reset the database? This will drop all data! (y/n): " confirm && \
 	if [ "$$confirm" = "y" ]; then \

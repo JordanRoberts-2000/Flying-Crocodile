@@ -1,9 +1,9 @@
 pub mod config;
 pub mod db;
 pub mod graphql;
-mod models;
+pub mod models;
 mod routes;
-mod schema;
+pub mod schema;
 pub mod services;
 pub mod state;
 pub mod utils;

@@ -1,22 +1,24 @@
 use async_graphql::{Request, Variables};
-use my_project::{
-    graphql::{create_schema::create_schema, queries::entries},
-    state::AppState,
-};
+use my_project::{graphql::create_schema::create_schema, state::AppState};
 use serde_json::json;
 
-use crate::helper_functions::db_reset;
+use crate::helper_functions::{
+    db::db_reset,
+    entries::{check_entry_in_db::check_entry_in_db, check_index_in_db::check_index_in_db},
+};
 
 #[tokio::test]
 async fn test_delete_root_mutation() {
     dotenv::from_filename(".env.test").ok();
     db_reset(|| {
         Box::pin(async {
-            // Initialize app state and schema
             let app_state = AppState::initialize();
+            let mut connection = app_state
+                .db_pool
+                .get()
+                .expect("Failed to get DB connection");
             let schema = create_schema(&app_state);
 
-            // Mutation queries
             let create_mutation_query = "mutation CreateRoot($title: String!) {
                 createRoot(newRootTitle: $title) {
                     id
@@ -37,21 +39,18 @@ async fn test_delete_root_mutation() {
                 }
             }";
 
-            // Helper to construct create request
             let create_request = |title: &str| {
                 Request::new(create_mutation_query).variables(Variables::from_json(json!({
                     "title": title
                 })))
             };
 
-            // Helper to construct delete request
             let delete_request = |title: &str| {
                 Request::new(delete_mutation_query).variables(Variables::from_json(json!({
                     "title": title
                 })))
             };
 
-            // Step 1: Create a root entry
             let create_response = schema.execute(create_request("new title")).await;
 
             assert!(
@@ -60,12 +59,24 @@ async fn test_delete_root_mutation() {
                 create_response.errors
             );
 
+            let create_data = create_response
+                .data
+                .into_json()
+                .expect("Failed to parse create response data");
+            let created_entry = create_data
+                .get("createRoot")
+                .expect("Missing createRoot field");
+
             assert_eq!(
                 created_entry["title"], "new title",
                 "The created entry title does not match"
             );
 
-            // Step 2: Delete the root entry
+            let created_id = created_entry["id"]
+                .as_i64()
+                .expect("Created entry ID should be an integer")
+                as i32;
+
             let delete_response = schema.execute(delete_request("new title")).await;
 
             assert!(
@@ -91,32 +102,19 @@ async fn test_delete_root_mutation() {
                 "The deleted entry title does not match the created entry title"
             );
 
-            // Step 3: Verify the entry is gone from the database
-            let mut connection = app_state
-                .db_pool
-                .get()
-                .expect("Failed to get DB connection");
-
-            let result = entries
-                .filter(id.eq(created_id))
-                .first::<Entry>(&mut connection);
+            let entry_check_result = check_entry_in_db(&mut connection, created_id);
 
             assert!(
-                result.is_err(),
-                "The entry was not deleted from the database as expected"
+                entry_check_result.is_err(),
+                "Expected the entry to be deleted, but it still exists in the database"
             );
 
-            // Step 4: Verify the index is gone
             let index_name = format!("idx_entries_by_root_id_{}", created_id);
-            let check_index_query = format!("SELECT to_regclass('{}')", index_name);
-
-            let index_result: Option<String> = diesel::sql_query(check_index_query)
-                .get_result::<Option<String>>(&mut connection)
-                .expect("Failed to execute index check query");
+            let index_check_result = check_index_in_db(&mut connection, &index_name);
 
             assert!(
-                index_result.is_none(),
-                "The index `{}` was not deleted as expected",
+                index_check_result.is_err(),
+                "Expected the index `{}` to be deleted, but it still exists in the database",
                 index_name
             );
         })

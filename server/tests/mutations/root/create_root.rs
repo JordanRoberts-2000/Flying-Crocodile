@@ -2,7 +2,10 @@ use async_graphql::{Request, Variables};
 use my_project::{graphql::create_schema::create_schema, state::AppState};
 use serde_json::json;
 
-use crate::helper_functions::db_reset;
+use crate::helper_functions::{
+    db::db_reset,
+    entries::{check_entry_in_db::check_entry_in_db, check_index_in_db::check_index_in_db},
+};
 
 #[tokio::test]
 async fn test_create_root_mutation() {
@@ -10,6 +13,10 @@ async fn test_create_root_mutation() {
     db_reset(|| {
         Box::pin(async {
             let app_state = AppState::initialize();
+            let mut connection = app_state
+                .db_pool
+                .get()
+                .expect("Failed to get database connection");
             let schema = create_schema(&app_state);
 
             let mutation_query = "mutation CreateRoot($title: String!) {
@@ -46,6 +53,18 @@ async fn test_create_root_mutation() {
                 created_entry["title"], "new title",
                 "The created entry title does not match"
             );
+
+            let created_id = created_entry["id"]
+                .as_i64()
+                .expect("Created entry ID should be an integer")
+                as i32;
+
+            check_entry_in_db(&mut connection, created_id)
+                .expect("Failed to find entry in the database");
+
+            let index_name = format!("idx_entries_by_root_id_{}", created_id);
+            check_index_in_db(&mut connection, &index_name)
+                .expect("Failed to find index in the database");
 
             // Check unique constraint on database
             let second_response = schema.execute(create_request("different title")).await;
