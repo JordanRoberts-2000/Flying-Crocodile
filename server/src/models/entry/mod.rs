@@ -19,28 +19,21 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn create_root(conn: &mut PgConnection, root_name: &str) -> Result<Self, String> {
-        let new_entry = NewEntry {
-            title: root_name.to_string(),
-            parent_id: None,
-            root_id: None,
-            is_folder: true,
-        };
-
+    pub fn create_entry(conn: &mut PgConnection, new_entry: &NewEntry) -> Result<Self, String> {
         let inserted_entry = diesel::insert_into(entries::table)
-            .values(&new_entry)
+            .values(new_entry)
             .returning(entries::all_columns)
             .get_result::<Entry>(conn)
             .map_err(|e| {
                 format!(
-                    "Error inserting root entry `{}` into the database: {}",
-                    root_name, e
+                    "Error inserting entry `{:?}` into the database: {}",
+                    new_entry, e
                 )
             })?;
 
         debug!(
-            "Root folder `{}` created successfully with ID {}.",
-            root_name, inserted_entry.id
+            "Entry `{}` created successfully with ID {}.",
+            inserted_entry.title, inserted_entry.id
         );
 
         Ok(inserted_entry)

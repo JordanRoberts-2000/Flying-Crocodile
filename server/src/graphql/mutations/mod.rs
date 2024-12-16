@@ -1,8 +1,8 @@
 use async_graphql::MergedObject;
-use entry_mutation::EntryMutation;
+use entry::EntryMutation;
 use root::EntryRootMutation;
 
-mod entry_mutation;
+mod entry;
 mod root;
 
 #[derive(MergedObject, Default)]

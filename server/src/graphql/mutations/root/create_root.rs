@@ -17,7 +17,7 @@ pub async fn create_root(ctx: &Context<'_>, new_root_title: String) -> Result<En
     })?;
 
     info!(
-        "{mutation_title} Successful - Root: `{new_root_title}`, completed in {:?}",
+        "{mutation_title} Successful - Root added with `{new_root_title}`, completed in {:?}",
         start_time.elapsed()
     );
 

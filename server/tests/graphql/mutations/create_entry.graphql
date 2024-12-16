@@ -1,0 +1,9 @@
+mutation CreateEntry($input: CreateEntryInput!) {
+  createEntry(input: $input) {
+    id
+    title
+    parentId
+    rootId
+    isFolder
+  }
+}
