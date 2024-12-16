@@ -1,8 +1,4 @@
-use crate::{
-    models::{Entry, NewEntry},
-    schema::entries,
-    state::AppState,
-};
+use crate::{models::Entry, state::AppState};
 use diesel::prelude::*;
 use log::debug;
 
@@ -17,23 +13,7 @@ impl RootService {
             )
         })?;
 
-        let new_entry = NewEntry {
-            title: root_name.to_string(),
-            parent_id: None,
-            root_id: None,
-            is_folder: true,
-        };
-
-        let inserted_entry: Entry = diesel::insert_into(entries::table)
-            .values(&new_entry)
-            .returning(entries::all_columns)
-            .get_result(&mut connection)
-            .map_err(|e| {
-                format!(
-                    "Error inserting entry `{}` into the database: {}",
-                    root_name, e
-                )
-            })?;
+        let inserted_entry = Entry::create_root(&mut connection, root_name)?;
 
         Self::add_to_cache(&app_state, &inserted_entry)?;
 
