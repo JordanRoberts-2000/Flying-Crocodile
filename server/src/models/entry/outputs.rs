@@ -1,7 +1,7 @@
 use async_graphql::SimpleObject;
 
 #[derive(SimpleObject)]
-pub struct FolderQueryResponse {
+pub struct GetEntriesQueryResponse {
     pub folder_id: i32,
     pub entries: Vec<MinimalEntry>,
 }

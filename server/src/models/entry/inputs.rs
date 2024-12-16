@@ -6,7 +6,7 @@ use validator::Validate;
 use crate::schema::entries;
 
 #[derive(InputObject, Validate)]
-pub struct FolderQueryInput {
+pub struct GetEntriesQueryInput {
     #[validate(length(min = 1, message = "Root title must not be empty"))]
     pub root_title: String,
     pub folder_id: Option<i32>,

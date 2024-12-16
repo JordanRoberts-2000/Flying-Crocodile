@@ -1,0 +1,10 @@
+query GetEntries($input: GetEntriesQueryInput!) {
+  getEntries(input: $input) {
+    folderId
+    entries {
+      id
+      title
+      isFolder
+    }
+  }
+}

@@ -1,2 +1,2 @@
-pub mod folder;
+pub mod entry;
 pub mod root;
