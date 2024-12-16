@@ -17,4 +17,13 @@ impl EntryRootMutation {
     async fn delete_root(&self, ctx: &Context<'_>, root_title: String) -> Result<Entry> {
         delete_root::delete_root(ctx, root_title).await
     }
+
+    async fn rename_root(
+        &self,
+        ctx: &Context<'_>,
+        old_title: String,
+        new_title: String,
+    ) -> Result<Entry> {
+        rename_root::rename_root(ctx, old_title, new_title).await
+    }
 }

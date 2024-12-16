@@ -65,6 +65,34 @@ impl Entry {
         Ok(deleted_entry)
     }
 
+    pub fn rename_root(
+        conn: &mut PgConnection,
+        current_title: &str,
+        new_title: &str,
+    ) -> Result<Self, String> {
+        let updated_entry: Entry = diesel::update(
+            entries::table
+                .filter(entries::title.eq(current_title))
+                .filter(entries::parent_id.is_null()),
+        )
+        .set(entries::title.eq(new_title))
+        .returning(entries::all_columns)
+        .get_result(conn)
+        .map_err(|e| {
+            format!(
+                "Failed to rename root entry `{}` to `{}`: {}",
+                current_title, new_title, e
+            )
+        })?;
+
+        debug!(
+            "Root folder `{}` successfully renamed to `{}` with ID {}.",
+            current_title, new_title, updated_entry.id
+        );
+
+        Ok(updated_entry)
+    }
+
     pub fn create_root_index(conn: &mut PgConnection, root_id: i32) -> Result<String, String> {
         let index_name = format!("idx_entries_by_root_id_{}", root_id);
         let create_index_query = format!(
