@@ -9,7 +9,7 @@ impl RootService {
 
         let inserted_entry = Entry::create_root(&mut conn, root_name)?;
 
-        Self::add_to_cache(&app_state, &inserted_entry)?;
+        app_state.cache.root.add(&inserted_entry)?;
 
         debug!(
             "Root folder `{}` created successfully with ID {}.",

@@ -12,7 +12,7 @@ impl RootService {
     pub fn delete_root(app_state: &AppState, root_title: &str) -> Result<Entry, String> {
         let mut conn = app_state.get_connection()?;
 
-        let root_id = Self::get_root_id_from_cache(&app_state, root_title)?;
+        let root_id = app_state.cache.root.get_root_id(root_title)?;
 
         // Drop the associated index
         let index_name = format!("idx_entries_by_root_id_{}", root_id);
@@ -43,7 +43,7 @@ impl RootService {
                 )
             })?;
 
-        Self::remove_from_cache(&app_state, root_title)?;
+        app_state.cache.root.remove(root_title)?;
 
         debug!(
             "Root folder `{}` and its associated entries were deleted successfully.",

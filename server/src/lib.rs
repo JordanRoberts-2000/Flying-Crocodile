@@ -45,7 +45,7 @@ pub fn create_server(app_state: Arc<AppState>) -> (u16, Server) {
 
     let environment = app_state.config.environment.clone();
 
-    RootService::initialize(&app_state);
+    RootService::create_initial_roots(&app_state);
 
     (
         port,

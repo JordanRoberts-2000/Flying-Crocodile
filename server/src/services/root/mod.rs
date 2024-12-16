@@ -1,9 +1,8 @@
 mod check_exists;
+mod create_initial_roots;
 mod create_root;
 mod delete_root;
 mod get_root;
-mod initialise;
-mod rename;
-mod root_cache;
+mod rename_root;
 
 pub struct RootService;

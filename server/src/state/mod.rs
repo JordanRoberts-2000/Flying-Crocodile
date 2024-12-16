@@ -1,10 +1,8 @@
-use std::{
-    collections::HashMap,
-    env,
-    sync::{Arc, Mutex},
-    time::Instant,
-};
+pub mod cache;
 
+use std::{env, sync::Arc, time::Instant};
+
+use cache::{AppCache, RootCache};
 use diesel::{
     r2d2::{ConnectionManager, PooledConnection},
     PgConnection,
@@ -18,11 +16,6 @@ pub struct AppConfig {
     pub environment: String,
 }
 
-pub type RootCache = Arc<Mutex<HashMap<String, i32>>>;
-
-pub struct AppCache {
-    pub root_cache: RootCache,
-}
 pub struct AppState {
     pub db_pool: DbPool,
     pub cache: AppCache,
@@ -49,7 +42,7 @@ impl AppState {
         Arc::new(AppState {
             db_pool,
             cache: AppCache {
-                root_cache: Arc::new(Mutex::new(HashMap::new())),
+                root: RootCache::new(),
             },
             config: AppConfig {
                 start_time: Instant::now(),
