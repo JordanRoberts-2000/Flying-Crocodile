@@ -21,7 +21,7 @@ impl RootService {
             root_name, inserted_entry.id
         );
 
-        let index_name = Entry::create_index(&mut conn, inserted_entry.id)?;
+        let index_name = Entry::create_root_index(&mut conn, inserted_entry.id)?;
 
         debug!(
             "Index `{}` created successfully for root ID {}.",

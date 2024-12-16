@@ -38,7 +38,7 @@ impl Entry {
             })
     }
 
-    pub fn create_index(conn: &mut PgConnection, root_id: i32) -> Result<String, String> {
+    pub fn create_root_index(conn: &mut PgConnection, root_id: i32) -> Result<String, String> {
         let index_name = format!("idx_entries_by_root_id_{}", root_id);
         let create_index_query = format!(
             "CREATE INDEX {} ON entries (parent_id) WHERE root_id = {};",
@@ -50,5 +50,13 @@ impl Entry {
             .map_err(|e| format!("Failed to create index for root_id {}: {}", root_id, e))?;
 
         Ok(index_name)
+    }
+
+    pub fn get_root(connection: &mut PgConnection, title: &str) -> Result<Self, String> {
+        entries::table
+            .filter(entries::title.eq(title))
+            .filter(entries::parent_id.is_null())
+            .first::<Entry>(connection)
+            .map_err(|e| format!("Error querying root entry `{}` from database: {}", title, e))
     }
 }
