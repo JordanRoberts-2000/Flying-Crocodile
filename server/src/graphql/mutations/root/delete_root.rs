@@ -17,7 +17,7 @@ pub async fn delete_root(ctx: &Context<'_>, root_title: String) -> Result<Entry>
     })?;
 
     info!(
-        "{mutation_title} Successful - Root: `{root_title}`, deleted in {:?}",
+        "{mutation_title} Successful - Root: `{root_title}`, completed in {:?}",
         start_time.elapsed()
     );
 

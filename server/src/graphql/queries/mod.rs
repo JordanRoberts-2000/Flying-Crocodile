@@ -1,7 +1,7 @@
 use async_graphql::MergedObject;
-use entries::{get_categories::CategoriesQuery, get_folder_entries::FolderQuery};
+use entries::{get_folder_entries::FolderQuery, get_roots::GetRootsQuery};
 
 pub mod entries;
 
 #[derive(MergedObject, Default)]
-pub struct RootQuery(FolderQuery, CategoriesQuery);
+pub struct RootQuery(FolderQuery, GetRootsQuery);

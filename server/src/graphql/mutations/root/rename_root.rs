@@ -17,7 +17,7 @@ pub async fn rename_root(ctx: &Context<'_>, old_title: String, new_title: String
     })?;
 
     info!(
-        "{mutation_title} Successful - Root: `{old_title}` renamed to '{new_title}', in {:?}",
+        "{mutation_title} Successful - Root: `{old_title}` renamed to '{new_title}', completed in {:?}",
         start_time.elapsed()
     );
 
