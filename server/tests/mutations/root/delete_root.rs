@@ -5,6 +5,7 @@ use serde_json::json;
 use crate::helper_functions::{
     db::db_reset,
     entries::{check_entry_in_db::check_entry_in_db, check_index_in_db::check_index_in_db},
+    load_graphql::{load_graphql, Mutation},
 };
 
 #[tokio::test]
@@ -19,25 +20,9 @@ async fn test_delete_root_mutation() {
                 .expect("Failed to get DB connection");
             let schema = create_schema(&app_state);
 
-            let create_mutation_query = "mutation CreateRoot($title: String!) {
-                createRoot(newRootTitle: $title) {
-                    id
-                    title
-                    parentId
-                    rootId
-                    isFolder
-                }
-            }";
+            let create_mutation_query = load_graphql(Mutation::CreateRoot);
 
-            let delete_mutation_query = "mutation DeleteRoot($title: String!) {
-                deleteRoot(rootTitle: $title) {
-                    id
-                    title
-                    parentId
-                    rootId
-                    isFolder
-                }
-            }";
+            let delete_mutation_query = load_graphql(Mutation::DeleteRoot);
 
             let create_request = |title: &str| {
                 Request::new(create_mutation_query).variables(Variables::from_json(json!({
