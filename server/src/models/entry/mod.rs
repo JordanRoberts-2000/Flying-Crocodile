@@ -52,11 +52,11 @@ impl Entry {
         Ok(index_name)
     }
 
-    pub fn get_root(connection: &mut PgConnection, title: &str) -> Result<Self, String> {
+    pub fn get_root(conn: &mut PgConnection, title: &str) -> Result<Self, String> {
         entries::table
             .filter(entries::title.eq(title))
             .filter(entries::parent_id.is_null())
-            .first::<Entry>(connection)
+            .first::<Entry>(conn)
             .map_err(|e| format!("Error querying root entry `{}` from database: {}", title, e))
     }
 }

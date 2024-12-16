@@ -10,12 +10,7 @@ use super::RootService;
 
 impl RootService {
     pub fn delete_root(app_state: &AppState, root_title: &str) -> Result<Entry, String> {
-        let mut connection = app_state.db_pool.get().map_err(|e| {
-            format!(
-                "Failed to get DB connection from pool while deleting entry `{}`: {}",
-                root_title, e
-            )
-        })?;
+        let mut conn = app_state.get_connection()?;
 
         let root_id = Self::get_root_id_from_cache(&app_state, root_title)?;
 
@@ -24,7 +19,7 @@ impl RootService {
         let drop_index_query = format!("DROP INDEX IF EXISTS {}; ", index_name);
 
         sql_query(drop_index_query)
-            .execute(&mut connection)
+            .execute(&mut conn)
             .map_err(|e| {
                 format!(
                     "Failed to drop index `{}` for root ID {}: {}",
@@ -40,7 +35,7 @@ impl RootService {
         // Delete the root entry
         let deleted_entry: Entry = diesel::delete(entries::table.filter(entries::id.eq(root_id)))
             .returning(entries::all_columns)
-            .get_result(&mut connection)
+            .get_result(&mut conn)
             .map_err(|e| {
                 format!(
                     "Failed to delete root entry `{}` from the database: {}",

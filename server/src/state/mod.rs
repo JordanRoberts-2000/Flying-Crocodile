@@ -5,6 +5,10 @@ use std::{
     time::Instant,
 };
 
+use diesel::{
+    r2d2::{ConnectionManager, PooledConnection},
+    PgConnection,
+};
 use log::{error, warn};
 
 use crate::db::{get_connection_pool, DbPool};
@@ -52,5 +56,13 @@ impl AppState {
                 environment,
             },
         })
+    }
+
+    pub fn get_connection(
+        &self,
+    ) -> Result<PooledConnection<ConnectionManager<PgConnection>>, String> {
+        self.db_pool
+            .get()
+            .map_err(|e| format!("Failed to get DB connection from pool: {}", e))
     }
 }

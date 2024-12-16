@@ -5,12 +5,7 @@ use super::RootService;
 
 impl RootService {
     pub fn create_root(app_state: &AppState, root_name: &str) -> Result<Entry, String> {
-        let mut conn = app_state.db_pool.get().map_err(|e| {
-            format!(
-                "Failed to get DB connection from pool while creating entry `{}`: {}",
-                root_name, e
-            )
-        })?;
+        let mut conn = app_state.get_connection()?;
 
         let inserted_entry = Entry::create_root(&mut conn, root_name)?;
 
