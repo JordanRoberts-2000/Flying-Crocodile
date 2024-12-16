@@ -1,5 +1,4 @@
 use crate::{models::Entry, state::AppState};
-use log::debug;
 
 use super::RootService;
 
@@ -11,17 +10,7 @@ impl RootService {
 
         app_state.cache.root.add(&inserted_entry)?;
 
-        debug!(
-            "Root folder `{}` created successfully with ID {}.",
-            root_name, inserted_entry.id
-        );
-
-        let index_name = Entry::create_root_index(&mut conn, inserted_entry.id)?;
-
-        debug!(
-            "Index `{}` created successfully for root ID {}.",
-            index_name, inserted_entry.id
-        );
+        Entry::create_root_index(&mut conn, inserted_entry.id)?;
 
         Ok(inserted_entry)
     }

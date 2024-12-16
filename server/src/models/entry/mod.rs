@@ -3,6 +3,7 @@ pub mod outputs;
 
 use async_graphql::SimpleObject;
 use diesel::prelude::*;
+use log::debug;
 
 use crate::schema::entries;
 
@@ -26,7 +27,7 @@ impl Entry {
             is_folder: true,
         };
 
-        diesel::insert_into(entries::table)
+        let inserted_entry = diesel::insert_into(entries::table)
             .values(&new_entry)
             .returning(entries::all_columns)
             .get_result::<Entry>(conn)
@@ -35,7 +36,33 @@ impl Entry {
                     "Error inserting root entry `{}` into the database: {}",
                     root_name, e
                 )
-            })
+            })?;
+
+        debug!(
+            "Root folder `{}` created successfully with ID {}.",
+            root_name, inserted_entry.id
+        );
+
+        Ok(inserted_entry)
+    }
+
+    pub fn delete_root(conn: &mut PgConnection, root_id: i32) -> Result<Self, String> {
+        let deleted_entry: Entry = diesel::delete(entries::table.filter(entries::id.eq(root_id)))
+            .returning(entries::all_columns)
+            .get_result(conn)
+            .map_err(|e| {
+                format!(
+                    "Failed to delete root entry with id `{}` from the database: {}",
+                    root_id, e
+                )
+            })?;
+
+        debug!(
+            "Root folder `{}` deleted successfully with ID {}.",
+            deleted_entry.title, deleted_entry.id
+        );
+
+        Ok(deleted_entry)
     }
 
     pub fn create_root_index(conn: &mut PgConnection, root_id: i32) -> Result<String, String> {
@@ -49,7 +76,33 @@ impl Entry {
             .execute(conn)
             .map_err(|e| format!("Failed to create index for root_id {}: {}", root_id, e))?;
 
+        debug!(
+            "Index `{}` created successfully for root ID {}.",
+            index_name, root_id
+        );
+
         Ok(index_name)
+    }
+
+    pub fn remove_root_index(conn: &mut PgConnection, root_id: i32) -> Result<(), String> {
+        let index_name = format!("idx_entries_by_root_id_{}", root_id);
+        let drop_index_query = format!("DROP INDEX IF EXISTS {}; ", index_name);
+
+        diesel::sql_query(drop_index_query)
+            .execute(conn)
+            .map_err(|e| {
+                format!(
+                    "Failed to drop index `{}` for root ID {}: {}",
+                    index_name, root_id, e
+                )
+            })?;
+
+        debug!(
+            "Successfully dropped index `{}` for root ID {}.",
+            index_name, root_id
+        );
+
+        Ok(())
     }
 
     pub fn get_root(conn: &mut PgConnection, title: &str) -> Result<Self, String> {
