@@ -4,6 +4,7 @@ use std::path::Path;
 pub enum Mutation {
     CreateRoot,
     DeleteRoot,
+    RenameRoot,
 }
 
 pub enum Query {
@@ -32,6 +33,7 @@ pub fn load_graphql(graphql_type: impl Into<GraphQLType>) -> String {
         GraphQLType::Mutation(mutation) => match mutation {
             Mutation::CreateRoot => "mutations/create_root.graphql",
             Mutation::DeleteRoot => "mutations/delete_root.graphql",
+            Mutation::RenameRoot => "mutations/rename_root.graphql",
         },
         GraphQLType::Query(query) => match query {
             Query::GetRoots => "queries/get_roots.graphql",

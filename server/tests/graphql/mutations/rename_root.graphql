@@ -1,0 +1,9 @@
+mutation RenameRoot($oldTitle: String!, $newTitle: String!) {
+  renameRoot(oldTitle: $oldTitle, newTitle: $newTitle) {
+    id
+    title
+    parentId
+    rootId
+    isFolder
+  }
+}

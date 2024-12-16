@@ -15,8 +15,7 @@ async fn test_delete_root_mutation() {
         Box::pin(async {
             let app_state = AppState::initialize();
             let mut connection = app_state
-                .db_pool
-                .get()
+                .get_connection()
                 .expect("Failed to get DB connection");
             let schema = create_schema(&app_state);
 

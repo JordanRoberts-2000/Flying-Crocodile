@@ -15,9 +15,8 @@ async fn test_create_root_mutation() {
         Box::pin(async {
             let app_state = AppState::initialize();
             let mut connection = app_state
-                .db_pool
-                .get()
-                .expect("Failed to get database connection");
+                .get_connection()
+                .expect("Failed to get DB connection");
             let schema = create_schema(&app_state);
 
             let mutation_query = load_graphql(Mutation::CreateRoot);
