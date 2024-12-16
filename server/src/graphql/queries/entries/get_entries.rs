@@ -22,25 +22,20 @@ impl GetEntriesQuery {
 
         let app_state = get_app_state(ctx, query_title)?;
 
-        // let (folder_id, entries) =
-        //     EntryService::get_entries(&app_state, input.folder_id, input.root_title.as_str())
-        //         .map_err(|e| {
-        //             error!(
-        //                 "{query_title} - Failed to get entries from id '{:?}' and tite '{}': {e}",
-        //                 input.folder_id, input.root_title
-        //             );
-        //             async_graphql::Error::new("Internal server error")
-        //         })?;
+        let (folder_id, entries) = EntryService::get_entries(&app_state, &input).map_err(|e| {
+            error!(
+                "{query_title} - Failed to get entries from id '{:?}' and tite '{}': {e}",
+                input.folder_id, input.root_title
+            );
+            async_graphql::Error::new("Internal server error")
+        })?;
 
-        // info!(
-        //     "{query_title} Successful - {} entries retrieved, completed in {:?}",
-        //     entries.len(),
-        //     start_time.elapsed()
-        // );
+        info!(
+            "{query_title} Successful - {} entries retrieved, completed in {:?}",
+            entries.len(),
+            start_time.elapsed()
+        );
 
-        Ok(GetEntriesResponse {
-            folder_id: 1,
-            entries: Vec::new(),
-        })
+        Ok(GetEntriesResponse { folder_id, entries })
     }
 }

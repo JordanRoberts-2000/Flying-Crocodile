@@ -1,4 +1,4 @@
-query GetEntries($input: GetEntriesQueryInput!) {
+query GetEntries($input: GetEntriesInput!) {
   getEntries(input: $input) {
     folderId
     entries {

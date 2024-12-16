@@ -136,66 +136,25 @@ impl Entry {
 
     pub fn get_entries(
         conn: &mut PgConnection,
-        parent_id: Option<i32>,
-        root_title: &str,
-    ) -> Result<(i32, Vec<MinimalEntry>), String> {
-        if let Some(parent_id) = parent_id {
-            // Check if the parent folder exists
-            let is_folder_exists = entries::table
-                .filter(entries::id.eq(parent_id))
-                .filter(entries::is_folder.eq(true))
-                .count()
-                .get_result::<i64>(conn)
-                .map_err(|e| format!("Failed to query folder with ID {}: {}", parent_id, e))?;
+        folder_id: i32,
+    ) -> Result<Vec<MinimalEntry>, String> {
+        let entries = entries::table
+            .filter(entries::parent_id.eq(Some(folder_id)))
+            .load::<Entry>(conn)
+            .map_err(|e| {
+                format!(
+                    "Failed to query entries for folder with ID {}: {}",
+                    folder_id, e
+                )
+            })?
+            .into_iter()
+            .map(|entry| MinimalEntry {
+                id: entry.id,
+                title: entry.title,
+                is_folder: entry.is_folder,
+            })
+            .collect();
 
-            if is_folder_exists == 0 {
-                return Err(format!("Folder with ID {} not found", parent_id));
-            }
-
-            let entries = entries::table
-                .filter(entries::parent_id.eq(parent_id))
-                .load::<Entry>(conn)
-                .map_err(|e| {
-                    format!(
-                        "Failed to query entries for folder with ID {}: {}",
-                        parent_id, e
-                    )
-                })?
-                .into_iter()
-                .map(|entry| MinimalEntry {
-                    id: entry.id,
-                    title: entry.title,
-                    is_folder: entry.is_folder,
-                })
-                .collect();
-
-            Ok((parent_id, entries))
-        } else {
-            let root_id = entries::table
-                .filter(entries::title.eq(root_title))
-                .filter(entries::parent_id.is_null())
-                .select(entries::id)
-                .get_result::<i32>(conn)
-                .map_err(|e| {
-                    format!(
-                        "Failed to query root folder with title '{}': {}",
-                        root_title, e
-                    )
-                })?;
-
-            let entries = entries::table
-                .filter(entries::parent_id.eq(Some(root_id)))
-                .load::<Entry>(conn)
-                .map_err(|e| format!("Failed to query entries for root ID {}: {}", root_id, e))?
-                .into_iter()
-                .map(|entry| MinimalEntry {
-                    id: entry.id,
-                    title: entry.title,
-                    is_folder: entry.is_folder,
-                })
-                .collect();
-
-            Ok((root_id, entries))
-        }
+        Ok(entries)
     }
 }
