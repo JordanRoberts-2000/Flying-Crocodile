@@ -5,7 +5,7 @@ use validator::Validate;
 
 use crate::schema::entries;
 
-#[derive(InputObject, Validate)]
+#[derive(InputObject, Validate, Serialize)]
 pub struct GetEntriesInput {
     #[validate(length(min = 1, message = "Root title must not be empty"))]
     pub root_title: String,

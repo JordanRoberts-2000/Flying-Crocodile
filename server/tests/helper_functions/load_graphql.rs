@@ -9,6 +9,7 @@ pub enum Mutation {
 
 pub enum Query {
     GetRoots,
+    GetEntries,
 }
 
 pub enum GraphQLType {
@@ -37,6 +38,7 @@ pub fn load_graphql(graphql_type: impl Into<GraphQLType>) -> String {
         },
         GraphQLType::Query(query) => match query {
             Query::GetRoots => "queries/get_roots.graphql",
+            Query::GetEntries => "queries/get_entries.graphql",
         },
     };
 
