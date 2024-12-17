@@ -1,12 +1,12 @@
-use async_graphql::Request;
+use async_graphql::{Request, Variables};
 use my_project::{
-    config::constants::INITIAL_ROOT_FOLDERS, graphql::create_schema::create_schema,
-    services::entries::EntryService, state::AppState,
+    graphql::create_schema::create_schema, models::CreateEntryInput, state::AppState,
 };
+use serde_json::json;
 
 use crate::helper_functions::{
     db::db_reset,
-    load_graphql::{load_graphql, Query},
+    load_graphql::{load_graphql, Mutation, Query},
 };
 
 #[tokio::test]
@@ -15,16 +15,48 @@ async fn test_get_roots_query() {
     db_reset(|| {
         Box::pin(async {
             let app_state = AppState::initialize();
-            EntryService::create_initial_roots(&app_state);
             let schema = create_schema(&app_state);
+
+            let create_entry_mutation = load_graphql(Mutation::CreateEntry);
             let get_roots_query = load_graphql(Query::GetRoots);
 
+            let create_request = |input: &CreateEntryInput| {
+                Request::new(&create_entry_mutation).variables(Variables::from_json(json!({
+                    "input": {
+                        "title": input.title,
+                        "parentId": input.parent_id,
+                        "isFolder": input.is_folder,
+                        "rootTitle": input.root_title
+                    }
+                })))
+            };
+
+            // Step 1: Manually create 3 root entries
+            let root_titles = vec!["Root 1", "Root 2", "Root 3"];
+            for title in &root_titles {
+                let root_input = CreateEntryInput {
+                    title: title.to_string(),
+                    parent_id: None,
+                    is_folder: true,
+                    root_title: None,
+                };
+
+                let response = schema.execute(create_request(&root_input)).await;
+                assert!(
+                    response.errors.is_empty(),
+                    "Failed to create root entry `{}`: {:?}",
+                    title,
+                    response.errors
+                );
+            }
+
+            // Step 2: Query the roots
             let request = Request::new(&get_roots_query);
             let response = schema.execute(request).await;
 
             assert!(
                 response.errors.is_empty(),
-                "Expected no errors, but found: {:?}",
+                "Expected no errors during querying roots, but found: {:?}",
                 response.errors
             );
 
@@ -48,14 +80,15 @@ async fn test_get_roots_query() {
                 })
                 .collect();
 
-            let mut initial_roots = INITIAL_ROOT_FOLDERS.clone();
+            let mut expected_roots = root_titles.clone();
+
+            actual_roots.sort();
+            expected_roots.sort();
 
             assert_eq!(
-                actual_roots.sort(),
-                initial_roots.sort(),
+                actual_roots, expected_roots,
                 "Expected roots {:?}, but got {:?}",
-                initial_roots.sort(),
-                actual_roots.sort()
+                expected_roots, actual_roots
             );
         })
     })
