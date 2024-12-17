@@ -1,8 +1,9 @@
 pub mod config;
 pub mod db;
 pub mod graphql;
+pub mod handlers;
 pub mod models;
-mod routes;
+pub mod routes;
 pub mod schema;
 pub mod services;
 pub mod state;
@@ -13,9 +14,12 @@ use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use config::logging::initialize_logger;
 use graphql::create_schema::create_schema;
-use graphql::{graphql_handler, index_graphiql};
+use handlers::{
+    graphql::{graphql_handler, index_graphiql},
+    health_check::health_check,
+};
 use log::{error, warn};
-use routes::health::health_check;
+use routes::auth_routes::auth_routes;
 use services::entries::EntryService;
 use state::AppState;
 use std::env;
@@ -67,6 +71,7 @@ pub fn create_server(app_state: Arc<AppState>) -> (u16, Server) {
                 .route("/graphql", web::get().to(index_graphiql))
                 .route("/graphql", web::post().to(graphql_handler))
                 .route("/health", web::get().to(health_check))
+                .configure(auth_routes)
         })
         .bind(("0.0.0.0", port))
         .unwrap_or_else(|err| {
