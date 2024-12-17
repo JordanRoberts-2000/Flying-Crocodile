@@ -5,6 +5,7 @@ pub enum Mutation {
     CreateEntry,
     DeleteEntry,
     RenameEntry,
+    MoveEntry,
 }
 
 pub enum Query {
@@ -35,6 +36,7 @@ pub fn load_graphql(graphql_type: impl Into<GraphQLType>) -> String {
             Mutation::CreateEntry => "mutations/create_entry.graphql",
             Mutation::DeleteEntry => "mutations/delete_entry.graphql",
             Mutation::RenameEntry => "mutations/rename_entry.graphql",
+            Mutation::MoveEntry => "mutations/move_entry.graphql",
         },
         GraphQLType::Query(query) => match query {
             Query::GetRoots => "queries/get_roots.graphql",
