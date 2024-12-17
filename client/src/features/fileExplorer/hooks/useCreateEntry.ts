@@ -1,7 +1,7 @@
 import request from "graphql-request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Entry, NewEntry } from "../../../gql/graphql";
-import { createEntry } from "@/features/entries/api/entryQueries";
+import { createEntry } from "@/features/fileExplorer/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
 import sortEntries from "../utils/sortEntries";
 import { toast } from "sonner";

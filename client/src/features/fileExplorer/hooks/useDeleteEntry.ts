@@ -1,6 +1,6 @@
 import request from "graphql-request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteEntry } from "@/features/entries/api/entryQueries";
+import { deleteEntry } from "@/features/fileExplorer/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
 import { Entry } from "@/gql/graphql";
 import { toast } from "sonner";

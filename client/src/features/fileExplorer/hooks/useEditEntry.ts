@@ -1,6 +1,6 @@
 import request from "graphql-request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateEntry } from "@/features/entries/api/entryQueries";
+import { updateEntry } from "@/features/fileExplorer/api/entryQueries";
 import { API_BASE_URL } from "@/constants";
 import { Entry } from "@/gql/graphql";
 import sortEntries from "../utils/sortEntries";

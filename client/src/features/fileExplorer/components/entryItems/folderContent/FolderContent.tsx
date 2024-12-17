@@ -2,12 +2,12 @@ import { Separator } from "@/components/ui/separator";
 import EntryInput from "../../EntryInput";
 import EntryFolder from "../EntryFolder";
 import EntryLink from "../EntryLink";
-import useGetEntries from "../../../hooks/useGetEntries";
+import useGetEntries from "../../../hooks/useGetFolderEntries";
 import FolderContentLoading from "./FolderContent.loading";
 import FolderContentError from "./FolderContent.error";
 import { useEffect } from "react";
-import { QueryPath } from "@/features/entries/entryTypes";
-import { useEntryStore } from "@/features/entries/store/EntryStoreProvider";
+import { QueryPath } from "@/features/fileExplorer/entryTypes";
+import { useEntryStore } from "@/features/fileExplorer/store/EntryStoreProvider";
 
 type Props = {
   queryPath: QueryPath;

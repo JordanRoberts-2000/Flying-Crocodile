@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import AppSidebar from "./components/AppSidebar";
 import { Sheet, SheetTrigger } from "./components/ui/sheet";
 import { useQueryClient } from "@tanstack/react-query";
-import { fetchRootEntry } from "./features/entries/api/entryQueries";
+import { fetchRootEntry } from "./features/fileExplorer/api/entryQueries";
 
 function App() {
   const queryClient = useQueryClient();

@@ -1,4 +1,4 @@
-import { getEntries } from "@/features/entries/api/entryQueries";
+import { getEntries } from "@/features/fileExplorer/api/entryQueries";
 import {
   Entry,
   GetEntriesQuery,
