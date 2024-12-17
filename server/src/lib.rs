@@ -14,12 +14,10 @@ use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use config::logging::initialize_logger;
 use graphql::create_schema::create_schema;
-use handlers::{
-    graphql::{graphql_handler, index_graphiql},
-    health_check::health_check,
-};
+use handlers::health_check::health_check;
 use log::{error, warn};
 use routes::auth_routes::auth_routes;
+use routes::graphql_routes::graphql_routes;
 use services::entries::EntryService;
 use state::AppState;
 use std::env;
@@ -68,9 +66,8 @@ pub fn create_server(app_state: Arc<AppState>) -> (u16, Server) {
                 .wrap(cors_config)
                 .app_data(web::Data::new(schema.clone()))
                 .app_data(web::Data::new(app_state.clone()))
-                .route("/graphql", web::get().to(index_graphiql))
-                .route("/graphql", web::post().to(graphql_handler))
                 .route("/health", web::get().to(health_check))
+                .configure(graphql_routes)
                 .configure(auth_routes)
         })
         .bind(("0.0.0.0", port))
