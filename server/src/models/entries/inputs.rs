@@ -27,6 +27,12 @@ pub struct DeleteEntryInput {
 }
 
 #[derive(InputObject, Serialize)]
+pub struct MoveEntryInput {
+    pub entry_id: i32,
+    pub new_parent_id: i32,
+}
+
+#[derive(InputObject, Serialize)]
 pub struct RenameEntryInput {
     pub entry_id: Option<i32>,
     pub root_title: String,

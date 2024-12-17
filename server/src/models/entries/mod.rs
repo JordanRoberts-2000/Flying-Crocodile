@@ -82,6 +82,42 @@ impl Entry {
         Ok(updated_entry)
     }
 
+    pub fn move_entry(
+        conn: &mut PgConnection,
+        entry_id: i32,
+        new_parent_id: i32,
+    ) -> Result<Self, String> {
+        // Validate that the new parent ID exists and is a folder (if required)
+        let is_valid_parent = entries::table
+            .filter(entries::id.eq(new_parent_id))
+            .filter(entries::is_folder.eq(true))
+            .select(entries::id)
+            .first::<i32>(conn)
+            .map_err(|_| {
+                format!(
+                    "Parent entry with ID `{}` does not exist or is not a folder.",
+                    new_parent_id
+                )
+            })?;
+
+        if is_valid_parent != new_parent_id {
+            return Err(format!("Invalid parent ID: `{}`.", new_parent_id));
+        }
+
+        let updated_entry: Entry = diesel::update(entries::table.filter(entries::id.eq(entry_id)))
+            .set(entries::parent_id.eq(new_parent_id))
+            .returning(entries::all_columns)
+            .get_result(conn)
+            .map_err(|e| {
+                format!(
+                    "Failed to move entry with ID `{}` to parent `{}`: {}",
+                    entry_id, new_parent_id, e
+                )
+            })?;
+
+        Ok(updated_entry)
+    }
+
     pub fn create_root_index(conn: &mut PgConnection, root_id: i32) -> Result<String, String> {
         let index_name = format!("idx_entries_by_root_id_{}", root_id);
         let create_index_query = format!(

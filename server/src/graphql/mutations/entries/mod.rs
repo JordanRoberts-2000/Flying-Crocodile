@@ -3,7 +3,7 @@ pub mod delete_entry;
 pub mod move_entry;
 pub mod rename_entry;
 
-use crate::models::{CreateEntryInput, DeleteEntryInput, Entry, RenameEntryInput};
+use crate::models::{CreateEntryInput, DeleteEntryInput, Entry, MoveEntryInput, RenameEntryInput};
 use async_graphql::{Context, Object, Result};
 
 #[derive(Default)]
@@ -21,5 +21,9 @@ impl EntryMutation {
 
     async fn rename_entry(&self, ctx: &Context<'_>, input: RenameEntryInput) -> Result<Entry> {
         rename_entry::rename_entry(ctx, input).await
+    }
+
+    async fn move_entry(&self, ctx: &Context<'_>, input: MoveEntryInput) -> Result<Entry> {
+        move_entry::move_entry(ctx, input).await
     }
 }

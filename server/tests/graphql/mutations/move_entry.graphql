@@ -1,0 +1,9 @@
+mutation MoveEntry($input: MoveEntryInput!) {
+  moveEntry(input: $input) {
+    id
+    title
+    parentId
+    rootId
+    isFolder
+  }
+}
