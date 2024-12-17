@@ -1,9 +1,0 @@
-mutation CreateRoot($title: String!) {
-  createRoot(newRootTitle: $title) {
-    id
-    title
-    parentId
-    rootId
-    isFolder
-  }
-}

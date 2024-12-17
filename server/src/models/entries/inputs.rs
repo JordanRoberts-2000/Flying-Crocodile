@@ -1,6 +1,6 @@
 use async_graphql::InputObject;
 use diesel::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::schema::entries;
@@ -12,12 +12,25 @@ pub struct GetEntriesInput {
     pub folder_id: Option<i32>,
 }
 
-#[derive(Deserialize, InputObject, Debug)]
+#[derive(Deserialize, Serialize, InputObject, Debug)]
 pub struct CreateEntryInput {
     pub title: String,
-    pub parent_id: i32,
+    pub parent_id: Option<i32>,
     pub is_folder: bool,
+    pub root_title: Option<String>,
+}
+
+#[derive(InputObject, Serialize)]
+pub struct DeleteEntryInput {
+    pub entry_id: Option<i32>,
     pub root_title: String,
+}
+
+#[derive(InputObject, Serialize)]
+pub struct RenameEntryInput {
+    pub entry_id: Option<i32>,
+    pub root_title: String,
+    pub new_title: String,
 }
 
 #[derive(Deserialize, Insertable, Debug)]

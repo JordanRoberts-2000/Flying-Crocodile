@@ -1,0 +1,9 @@
+mutation RenameRoot($input: RenameEntryInput!) {
+  renameEntry(input: $input) {
+    id
+    title
+    parentId
+    rootId
+    isFolder
+  }
+}

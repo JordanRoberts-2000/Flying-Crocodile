@@ -9,7 +9,7 @@ use crate::helper_functions::{
 };
 
 #[tokio::test]
-async fn test_rename_root_mutation() {
+async fn test_rename_entry_mutation() {
     dotenv::from_filename(".env.test").ok();
     db_reset(|| {
         Box::pin(async {
@@ -19,19 +19,27 @@ async fn test_rename_root_mutation() {
                 .expect("Failed to get DB connection");
             let schema = create_schema(&app_state);
 
-            let create_root_mutation = load_graphql(Mutation::CreateRoot);
-            let rename_root_mutation = load_graphql(Mutation::RenameRoot);
+            let create_entry_mutation = load_graphql(Mutation::CreateEntry);
+            let rename_entry_mutation = load_graphql(Mutation::RenameEntry);
 
             let create_request = |title: &str| {
-                Request::new(&create_root_mutation).variables(Variables::from_json(json!({
-                    "title": title
+                Request::new(&create_entry_mutation).variables(Variables::from_json(json!({
+                    "input": {
+                        "title": title,
+                        "parentId": null,
+                        "isFolder": true,
+                        "rootTitle": null
+                    }
                 })))
             };
 
-            let rename_request = |old_title: &str, new_title: &str| {
-                Request::new(&rename_root_mutation).variables(Variables::from_json(json!({
-                    "oldTitle": old_title,
-                    "newTitle": new_title
+            let rename_request = |entry_id: Option<i32>, root_title: &str, new_title: &str| {
+                Request::new(&rename_entry_mutation).variables(Variables::from_json(json!({
+                    "input": {
+                        "entryId": entry_id,
+                        "rootTitle": root_title,
+                        "newTitle": new_title
+                    }
                 })))
             };
 
@@ -49,8 +57,8 @@ async fn test_rename_root_mutation() {
                 .into_json()
                 .expect("Failed to parse create response data");
             let created_entry = create_data
-                .get("createRoot")
-                .expect("Missing createRoot field");
+                .get("createEntry")
+                .expect("Missing createEntry field");
 
             assert_eq!(
                 created_entry["title"], "new title",
@@ -62,13 +70,12 @@ async fn test_rename_root_mutation() {
                 .expect("Created entry ID should be an integer")
                 as i32;
 
-            // Step 2: Validate the entry exists in the database
             check_entry_in_db(&mut connection, created_id)
                 .expect("Failed to find entry in the database");
 
-            // Step 3: Rename the root entry
+            // Step 2: Rename the entry
             let rename_response = schema
-                .execute(rename_request("new title", "different title"))
+                .execute(rename_request(Some(created_id), "", "different title"))
                 .await;
 
             assert!(
@@ -82,8 +89,8 @@ async fn test_rename_root_mutation() {
                 .into_json()
                 .expect("Failed to parse rename response data");
             let renamed_entry = rename_data
-                .get("renameRoot")
-                .expect("Missing renameRoot field");
+                .get("renameEntry")
+                .expect("Missing renameEntry field");
 
             assert_eq!(
                 renamed_entry["id"], created_entry["id"],
@@ -94,7 +101,6 @@ async fn test_rename_root_mutation() {
                 "The renamed entry title does not match the new title"
             );
 
-            // Step 4: Validate the renamed entry exists in the database
             let updated_entry = check_entry_in_db(&mut connection, created_id)
                 .expect("Failed to find the renamed entry in the database");
 

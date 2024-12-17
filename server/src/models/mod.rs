@@ -1,3 +1,3 @@
-pub mod entry;
+pub mod entries;
 
-pub use entry::{inputs::*, outputs::*, Entry};
+pub use entries::{inputs::*, outputs::*, Entry};

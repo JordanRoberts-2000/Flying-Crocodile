@@ -39,48 +39,44 @@ impl Entry {
         Ok(inserted_entry)
     }
 
-    pub fn delete_root(conn: &mut PgConnection, root_id: i32) -> Result<Self, String> {
-        let deleted_entry: Entry = diesel::delete(entries::table.filter(entries::id.eq(root_id)))
+    pub fn delete_entry(conn: &mut PgConnection, entry_id: i32) -> Result<Self, String> {
+        let deleted_entry: Entry = diesel::delete(entries::table.filter(entries::id.eq(entry_id)))
             .returning(entries::all_columns)
             .get_result(conn)
             .map_err(|e| {
                 format!(
-                    "Failed to delete root entry with id `{}` from the database: {}",
-                    root_id, e
+                    "Failed to delete entry with id `{}` from the database: {}",
+                    entry_id, e
                 )
             })?;
 
         debug!(
-            "Root folder `{}` deleted successfully with ID {}.",
+            "Entry `{}` deleted successfully with ID {}.",
             deleted_entry.title, deleted_entry.id
         );
 
         Ok(deleted_entry)
     }
 
-    pub fn rename_root(
+    pub fn rename_entry(
         conn: &mut PgConnection,
-        current_title: &str,
+        entry_id: i32,
         new_title: &str,
     ) -> Result<Self, String> {
-        let updated_entry: Entry = diesel::update(
-            entries::table
-                .filter(entries::title.eq(current_title))
-                .filter(entries::parent_id.is_null()),
-        )
-        .set(entries::title.eq(new_title))
-        .returning(entries::all_columns)
-        .get_result(conn)
-        .map_err(|e| {
-            format!(
-                "Failed to rename root entry `{}` to `{}`: {}",
-                current_title, new_title, e
-            )
-        })?;
+        let updated_entry: Entry = diesel::update(entries::table.filter(entries::id.eq(entry_id)))
+            .set(entries::title.eq(new_title))
+            .returning(entries::all_columns)
+            .get_result(conn)
+            .map_err(|e| {
+                format!(
+                    "Failed to rename entry with ID `{}` to `{}`: {}",
+                    entry_id, new_title, e
+                )
+            })?;
 
         debug!(
-            "Root folder `{}` successfully renamed to `{}` with ID {}.",
-            current_title, new_title, updated_entry.id
+            "Entry with ID `{}` successfully renamed to `{}`.",
+            updated_entry.id, updated_entry.title
         );
 
         Ok(updated_entry)

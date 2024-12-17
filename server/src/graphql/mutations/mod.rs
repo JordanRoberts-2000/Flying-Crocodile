@@ -1,9 +1,8 @@
 use async_graphql::MergedObject;
-use entry::EntryMutation;
-use root::EntryRootMutation;
+use entries::EntryMutation;
 
-mod entry;
-mod root;
+mod entries;
 
 #[derive(MergedObject, Default)]
-pub struct RootMutation(EntryMutation, EntryRootMutation);
+pub struct RootMutation(EntryMutation);
+// pub struct RootMutation(EntryMutation, EntryRootMutation);

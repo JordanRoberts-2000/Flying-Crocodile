@@ -1,8 +1,8 @@
 use crate::{models::Entry, state::AppState};
 
-use super::RootService;
+use super::EntryService;
 
-impl RootService {
+impl EntryService {
     pub fn get_root(app_state: &AppState, title: &str) -> Result<Entry, String> {
         let mut conn = app_state.get_connection()?;
 

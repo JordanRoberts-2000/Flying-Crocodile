@@ -1,6 +1,6 @@
 use crate::{
     models::{CreateEntryInput, Entry},
-    services::entry::EntryService,
+    services::entries::EntryService,
     utils::get_app_state::get_app_state,
 };
 use async_graphql::{Context, Result};

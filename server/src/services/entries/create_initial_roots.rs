@@ -1,10 +1,10 @@
 use log::{debug, error, info};
 
-use crate::{config::constants::INITIAL_ROOT_FOLDERS, state::AppState};
+use crate::{config::constants::INITIAL_ROOT_FOLDERS, models::CreateEntryInput, state::AppState};
 
-use super::RootService;
+use super::EntryService;
 
-impl RootService {
+impl EntryService {
     pub fn create_initial_roots(app_state: &AppState) {
         if let Err(err) = Self::try_initialize(app_state) {
             error!("Failed to initialize root folders: {}", err);
@@ -19,7 +19,14 @@ impl RootService {
                     app_state.cache.root.add(&entry)?;
                 }
                 Err(_) => {
-                    Self::create_root(app_state, folder)
+                    let root_input = CreateEntryInput {
+                        title: folder.to_string(),
+                        parent_id: None,
+                        is_folder: true,
+                        root_title: None,
+                    };
+
+                    Self::create_entry(app_state, &root_input)
                         .map_err(|e| format!("Error creating root folder `{}`: {}", folder, e))?;
                     info!("Created root folder `{}`.", folder);
                 }

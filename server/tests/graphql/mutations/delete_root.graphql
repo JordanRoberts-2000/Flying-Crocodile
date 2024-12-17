@@ -1,9 +1,0 @@
-mutation DeleteRoot($title: String!) {
-  deleteRoot(rootTitle: $title) {
-    id
-    title
-    parentId
-    rootId
-    isFolder
-  }
-}

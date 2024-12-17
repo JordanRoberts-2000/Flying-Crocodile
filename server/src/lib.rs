@@ -16,7 +16,7 @@ use graphql::create_schema::create_schema;
 use graphql::{graphql_handler, index_graphiql};
 use log::{error, warn};
 use routes::health::health_check;
-use services::root::RootService;
+use services::entries::EntryService;
 use state::AppState;
 use std::env;
 use std::sync::Arc;
@@ -45,7 +45,7 @@ pub fn create_server(app_state: Arc<AppState>) -> (u16, Server) {
 
     let environment = app_state.config.environment.clone();
 
-    RootService::create_initial_roots(&app_state);
+    EntryService::create_initial_roots(&app_state);
 
     (
         port,

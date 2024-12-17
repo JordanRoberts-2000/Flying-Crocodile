@@ -1,0 +1,9 @@
+mutation DeleteEntry($input: DeleteEntryInput!) {
+  deleteEntry(input: $input) {
+    id
+    title
+    parentId
+    rootId
+    isFolder
+  }
+}

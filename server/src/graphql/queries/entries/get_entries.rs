@@ -1,5 +1,5 @@
 use crate::models::{GetEntriesInput, GetEntriesResponse};
-use crate::services::entry::EntryService;
+use crate::services::entries::EntryService;
 use crate::utils::get_app_state::get_app_state;
 use async_graphql::{Context, Object, Result};
 use log::{error, info};
