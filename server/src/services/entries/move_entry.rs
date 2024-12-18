@@ -1,5 +1,5 @@
 use crate::models::{Entry, MoveEntryInput};
-use crate::state::AppState;
+use crate::state::app_state::AppState;
 
 use super::EntryService;
 

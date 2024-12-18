@@ -1,4 +1,4 @@
-use crate::{models::Entry, state::AppState};
+use crate::{models::Entry, state::app_state::AppState};
 
 use super::EntryService;
 

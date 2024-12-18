@@ -19,7 +19,7 @@ use log::{error, warn};
 use routes::auth_routes::auth_routes;
 use routes::graphql_routes::graphql_routes;
 use services::entries::EntryService;
-use state::AppState;
+use state::app_state::AppState;
 use std::env;
 use std::sync::Arc;
 use utils::setup_limiter::setup_limiter;

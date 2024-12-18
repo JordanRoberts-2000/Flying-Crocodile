@@ -1,6 +1,8 @@
 use log::{debug, error, info};
 
-use crate::{config::constants::INITIAL_ROOT_FOLDERS, models::CreateEntryInput, state::AppState};
+use crate::{
+    config::constants::INITIAL_ROOT_FOLDERS, models::CreateEntryInput, state::app_state::AppState,
+};
 
 use super::EntryService;
 

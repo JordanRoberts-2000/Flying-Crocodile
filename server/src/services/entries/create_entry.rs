@@ -1,6 +1,6 @@
 use crate::{
     models::{CreateEntryInput, Entry, NewEntry},
-    state::AppState,
+    state::app_state::AppState,
 };
 
 use super::EntryService;

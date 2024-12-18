@@ -1,12 +1,11 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct GitHubCallbackQueryParams {
     pub code: String,
     pub state: Option<String>, // State for CSRF protection
 }
 
-/// GitHub OAuth Access Token Response
 #[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct GitHubAccessTokenResponse {
@@ -14,9 +13,8 @@ pub struct GitHubAccessTokenResponse {
     token_type: String,
 }
 
-/// GitHub User Information Response
-#[derive(Deserialize)]
-pub struct GitHubUserResponse {
+#[derive(Deserialize, Clone, Debug)]
+pub struct GitHubUser {
     pub login: String,
     pub name: Option<String>,
     pub email: Option<String>,

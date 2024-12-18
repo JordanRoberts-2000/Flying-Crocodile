@@ -1,6 +1,6 @@
 use async_graphql::{Request, Variables};
 use my_project::{
-    graphql::create_schema::create_schema, models::CreateEntryInput, state::AppState,
+    graphql::create_schema::create_schema, models::CreateEntryInput, state::app_state::AppState,
 };
 use serde_json::json;
 

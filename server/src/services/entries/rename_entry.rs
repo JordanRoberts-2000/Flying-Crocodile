@@ -1,6 +1,6 @@
 use crate::{
     models::{Entry, RenameEntryInput},
-    state::AppState,
+    state::app_state::AppState,
 };
 
 use super::EntryService;

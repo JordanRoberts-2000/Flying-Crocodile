@@ -1,18 +1,25 @@
-use actix_web::{web, Error, HttpResponse};
-use log::{error, info};
+use std::sync::Arc;
+
+use actix_web::{http::header, web, Error, HttpResponse};
+use log::{debug, error, info, warn};
+use uuid::Uuid;
 
 use crate::{
-    models::auth::{GitHubAccessTokenResponse, GitHubCallbackQueryParams, GitHubUserResponse},
+    models::auth::github::{GitHubAccessTokenResponse, GitHubCallbackQueryParams, GitHubUser},
+    state::app_state::AppState,
     utils::env::get_env_var,
 };
 
 pub async fn github_callback(
+    app_state: web::Data<Arc<AppState>>,
     query: web::Query<GitHubCallbackQueryParams>,
 ) -> Result<HttpResponse, Error> {
     info!("GitHub callback hit");
 
     let github_client_id = get_env_var("GITHUB_CLIENT_ID")?;
     let github_client_secret = get_env_var("GITHUB_CLIENT_SECRET")?;
+    let admin_username = get_env_var("GITHUB_ADMIN_USERNAME")?;
+    let login_redirect = get_env_var("SUCCESSFUL_LOGIN_REDIRECT")?;
 
     let code = &query.code;
     let state = &query.state;
@@ -47,11 +54,16 @@ pub async fn github_callback(
         }
     };
 
-    let body = token_response
-        .text()
-        .await
-        .unwrap_or_else(|_| "Failed to read body".to_string());
-    error!("GitHub callback - Access token response body: {}", body);
+    let body = match token_response.text().await {
+        Ok(body) => body,
+        Err(e) => {
+            error!(
+                "GitHub callback - Failed to read access token response body: {}",
+                e
+            );
+            return Ok(HttpResponse::InternalServerError().body("Internal Server Error"));
+        }
+    };
 
     let access_token = match serde_json::from_str::<GitHubAccessTokenResponse>(&body) {
         Ok(token) => token.access_token,
@@ -73,7 +85,7 @@ pub async fn github_callback(
         .await;
 
     let user = match user_response {
-        Ok(resp) => match resp.json::<GitHubUserResponse>().await {
+        Ok(resp) => match resp.json::<GitHubUser>().await {
             Ok(user) => user,
             Err(e) => {
                 error!("GitHub callback - Failed to parse user info: {}", e);
@@ -86,20 +98,37 @@ pub async fn github_callback(
         }
     };
 
+    if user.login != admin_username {
+        warn!("Unauthorized GitHub login attempt by user: {}", user.login);
+        return Ok(HttpResponse::Forbidden().body("Unauthorized user"));
+    }
+
     info!(
         "GitHub callback Successful - User `{}` with email `{}`",
         user.login,
         user.email.clone().unwrap_or_else(|| "N/A".to_string())
     );
 
-    // Step 3: Respond to the client
-    Ok(HttpResponse::Ok().json(serde_json::json!({
-        "message": "GitHub OAuth successful",
-        "user": {
-            "username": user.login,
-            "name": user.name.unwrap_or_default(),
-            "email": user.email.unwrap_or_default(),
-            "avatar_url": user.avatar_url.unwrap_or_default()
-        }
-    })))
+    let session_id = Uuid::new_v4().to_string();
+
+    if let Err(e) = app_state.session_store.add_session(&session_id, user) {
+        error!("Failed to add session: {}", e);
+        return Ok(HttpResponse::InternalServerError().body("Internal Server Error"));
+    }
+
+    debug!(
+        "Current session store: {:#?}",
+        app_state.session_store.sessions.lock().unwrap()
+    );
+
+    let session_cookie = actix_web::cookie::Cookie::build("session_id", session_id)
+        .http_only(true)
+        // .secure(true) // Ensure this is secure; only works over HTTPS in production
+        .path("/") // Cookie available to the entire site
+        .finish();
+
+    Ok(HttpResponse::Found()
+        .append_header((header::LOCATION, login_redirect))
+        .cookie(session_cookie)
+        .finish())
 }

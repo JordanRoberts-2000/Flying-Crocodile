@@ -1,5 +1,5 @@
 use actix_web::{http::StatusCode, test, web, App};
-use my_project::{handlers::health_check::health_check, state::AppState};
+use my_project::{handlers::health_check::health_check, state::app_state::AppState};
 
 #[actix_web::test]
 async fn test_health_check() {

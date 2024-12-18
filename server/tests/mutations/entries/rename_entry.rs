@@ -1,5 +1,5 @@
 use async_graphql::{Request, Variables};
-use my_project::{graphql::create_schema::create_schema, state::AppState};
+use my_project::{graphql::create_schema::create_schema, state::app_state::AppState};
 use serde_json::json;
 
 use crate::helper_functions::{
