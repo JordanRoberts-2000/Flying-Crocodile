@@ -7,7 +7,7 @@ use log::info;
 use crate::AppState;
 
 pub async fn health_check(app_state: web::Data<Arc<AppState>>) -> impl Responder {
-    info!("Health check endpoint hit.");
+    info!("Health check hit");
 
     let environment = &app_state.config.environment;
     let db_status = match app_state.get_connection() {

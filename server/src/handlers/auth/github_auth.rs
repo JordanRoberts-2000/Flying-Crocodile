@@ -1,5 +1,5 @@
 use actix_web::{Error, HttpResponse};
-use log::error;
+use log::{error, info};
 use rand::Rng;
 use url::Url;
 
@@ -7,6 +7,8 @@ use crate::utils::env::get_env_var;
 
 /// Handler to redirect users to GitHub for OAuth
 pub async fn github_auth() -> Result<HttpResponse, Error> {
+    info!("GitHub auth hit");
+
     let client_id = get_env_var("GITHUB_CLIENT_ID")?;
     let redirect_uri = get_env_var("GITHUB_REDIRECT_URI")?;
 
@@ -26,9 +28,11 @@ pub async fn github_auth() -> Result<HttpResponse, Error> {
         ],
     )
     .map_err(|e| {
-        error!("Failed to build GitHub OAuth URL: {}", e);
+        error!("GitHub auth - Failed to parse GitHub OAuth URL: {}", e);
         actix_web::error::ErrorInternalServerError("Internal server error")
     })?;
+
+    info!("GitHub auth Successful - Redirecting user to Github login");
 
     Ok(HttpResponse::Found()
         .append_header(("Location", auth_url.to_string()))
