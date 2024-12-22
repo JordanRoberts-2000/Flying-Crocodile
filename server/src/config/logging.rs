@@ -1,5 +1,5 @@
 use actix_web::{middleware::Logger, HttpRequest};
-use log::{debug, error, info, warn};
+use log::{debug, error, info, warn, Level};
 
 pub fn initialize_logger() {
     env_logger::builder()
@@ -17,27 +17,33 @@ pub fn logging_middleware() -> Logger {
 pub struct Log;
 
 impl Log {
-    pub fn debug(req: &HttpRequest, message: &str) {
+    pub fn log(req: &HttpRequest, level: Level, message: &str) {
         let method = req.method();
         let path = req.path();
-        debug!("{} {} - {}", method, path, message);
+        let formatted_message = format!("{} {} - {}", method, path, message);
+
+        match level {
+            Level::Debug => debug!("{}", formatted_message),
+            Level::Info => info!("{}", formatted_message),
+            Level::Warn => warn!("{}", formatted_message),
+            Level::Error => error!("{}", formatted_message),
+            _ => (),
+        }
+    }
+
+    pub fn debug(req: &HttpRequest, message: &str) {
+        Self::log(req, Level::Debug, message);
     }
 
     pub fn info(req: &HttpRequest, message: &str) {
-        let method = req.method();
-        let path = req.path();
-        info!("{} {} - {}", method, path, message);
+        Self::log(req, Level::Info, message);
     }
 
     pub fn warn(req: &HttpRequest, message: &str) {
-        let method = req.method();
-        let path = req.path();
-        warn!("{} {} - {}", method, path, message);
+        Self::log(req, Level::Warn, message);
     }
 
     pub fn error(req: &HttpRequest, message: &str) {
-        let method = req.method();
-        let path = req.path();
-        error!("{} {} - {}", method, path, message);
+        Self::log(req, Level::Error, message);
     }
 }

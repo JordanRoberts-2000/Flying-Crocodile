@@ -1,13 +1,28 @@
-use actix_web::{Error, HttpResponse};
+use std::sync::Arc;
+
+use actix_web::{http::header, web, Error, HttpRequest, HttpResponse};
 use log::{error, info};
 use rand::Rng;
 use url::Url;
 
-use crate::utils::env::get_env_var;
+use crate::{
+    config::logging::Log, services::auth::AuthService, state::app_state::AppState,
+    utils::env::get_env_var,
+};
 
 /// Handler to redirect users to GitHub for OAuth
-pub async fn github_auth() -> Result<HttpResponse, Error> {
+pub async fn github_auth(
+    req: HttpRequest,
+    app_state: web::Data<Arc<AppState>>,
+) -> Result<HttpResponse, Error> {
     info!("GitHub auth hit");
+
+    if let Ok(Some(_)) = AuthService::is_authenticated(&req, &app_state) {
+        Log::info(&req, "User already authenticated; redirecting to homepage.");
+        return Ok(HttpResponse::Found()
+            .append_header((header::LOCATION, "/"))
+            .finish());
+    }
 
     let client_id = get_env_var("GITHUB_CLIENT_ID")?;
     let redirect_uri = get_env_var("GITHUB_REDIRECT_URI")?;

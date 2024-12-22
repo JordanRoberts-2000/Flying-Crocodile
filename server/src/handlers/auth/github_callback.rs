@@ -1,20 +1,30 @@
 use std::sync::Arc;
 
-use actix_web::{http::header, web, Error, HttpResponse};
+use actix_web::{http::header, web, Error, HttpRequest, HttpResponse};
 use log::{debug, error, info, warn};
 use uuid::Uuid;
 
 use crate::{
+    config::logging::Log,
     models::auth::github::{GitHubAccessTokenResponse, GitHubCallbackQueryParams, GitHubUser},
+    services::auth::AuthService,
     state::app_state::AppState,
     utils::env::get_env_var,
 };
 
 pub async fn github_callback(
+    req: HttpRequest,
     app_state: web::Data<Arc<AppState>>,
     query: web::Query<GitHubCallbackQueryParams>,
 ) -> Result<HttpResponse, Error> {
     info!("GitHub callback hit");
+
+    if let Ok(Some(_)) = AuthService::is_authenticated(&req, &app_state) {
+        Log::info(&req, "User already logged in; skipping GitHub login flow.");
+        return Ok(HttpResponse::Found()
+            .append_header((header::LOCATION, "/"))
+            .finish());
+    }
 
     let github_client_id = get_env_var("GITHUB_CLIENT_ID")?;
     let github_client_secret = get_env_var("GITHUB_CLIENT_SECRET")?;
