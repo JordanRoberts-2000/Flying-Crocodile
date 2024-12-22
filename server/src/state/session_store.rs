@@ -34,9 +34,9 @@ impl SessionStore {
         Ok(session)
     }
 
-    pub fn add_session(&self, session_id: &String, user: GitHubUser) -> Result<(), String> {
+    pub fn add_session(&self, session_id: &String, user: &GitHubUser) -> Result<(), String> {
         let session = SessionData {
-            user,
+            user: user.clone(),
             created_at: SystemTime::now(),
         };
 

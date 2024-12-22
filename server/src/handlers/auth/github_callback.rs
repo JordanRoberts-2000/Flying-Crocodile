@@ -103,15 +103,9 @@ pub async fn github_callback(
         return Ok(HttpResponse::Forbidden().body("Unauthorized user"));
     }
 
-    info!(
-        "GitHub callback Successful - User `{}` with email `{}`",
-        user.login,
-        user.email.clone().unwrap_or_else(|| "N/A".to_string())
-    );
-
     let session_id = Uuid::new_v4().to_string();
 
-    if let Err(e) = app_state.session_store.add_session(&session_id, user) {
+    if let Err(e) = app_state.session_store.add_session(&session_id, &user) {
         error!("Failed to add session: {}", e);
         return Ok(HttpResponse::InternalServerError().body("Internal Server Error"));
     }
@@ -126,6 +120,8 @@ pub async fn github_callback(
         // .secure(true) // Ensure this is secure; only works over HTTPS in production
         .path("/") // Cookie available to the entire site
         .finish();
+
+    info!("GitHub callback Successful - User `{}`", user.login);
 
     Ok(HttpResponse::Found()
         .append_header((header::LOCATION, login_redirect))

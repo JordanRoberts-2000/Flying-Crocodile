@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 pub struct GitHubCallbackQueryParams {
@@ -13,7 +13,7 @@ pub struct GitHubAccessTokenResponse {
     token_type: String,
 }
 
-#[derive(Deserialize, Clone, Debug)]
+#[derive(Deserialize, Clone, Debug, Serialize)]
 pub struct GitHubUser {
     pub login: String,
     pub name: Option<String>,
