@@ -1,6 +1,7 @@
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import AdminLoginDialog from "./AdminLoginDialog";
 import { useAdminStatus } from "@/features/auth/useAdminStatus";
+import LogoutButton from "@/features/auth/LogoutButton";
 
 const ProfileSection = ({}) => {
   const { data: admin } = useAdminStatus();
@@ -15,9 +16,9 @@ const ProfileSection = ({}) => {
           ></img>
           <div>
             <p className="">{admin.login}</p>
-            <button className="text-xs border border-gray-200 px-2 rounded-md py-0.5">
+            <LogoutButton className="text-xs border border-gray-200 px-2 rounded-md py-0.5">
               Log out
-            </button>
+            </LogoutButton>
           </div>
         </div>
       ) : (
