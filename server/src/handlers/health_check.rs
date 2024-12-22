@@ -1,14 +1,10 @@
-use std::sync::Arc;
-
 use actix_web::{web, HttpResponse, Responder};
 use diesel::{dsl::sql_query, RunQueryDsl};
-use log::info;
+use std::sync::Arc;
 
 use crate::AppState;
 
 pub async fn health_check(app_state: web::Data<Arc<AppState>>) -> impl Responder {
-    info!("Health check hit");
-
     let environment = &app_state.config.environment;
     let db_status = match app_state.get_connection() {
         Ok(mut conn) => match sql_query("SELECT 1").execute(&mut conn) {
