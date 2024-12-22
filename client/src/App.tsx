@@ -2,14 +2,14 @@ import { useEffect } from "react";
 import AppSidebar from "./components/AppSidebar";
 import { Sheet, SheetTrigger } from "./components/ui/sheet";
 import { useQueryClient } from "@tanstack/react-query";
-import { fetchRootEntry } from "./features/fileExplorer/api/entryQueries";
+import { fetchAdminStatus } from "./features/auth/useAdminStatus";
 
 function App() {
   const queryClient = useQueryClient();
   useEffect(() => {
     queryClient.prefetchQuery({
-      queryKey: ["entries", "root", "public"],
-      queryFn: () => fetchRootEntry("public", queryClient),
+      queryKey: ["adminStatus"],
+      queryFn: () => fetchAdminStatus(),
     });
   }, []);
   return (

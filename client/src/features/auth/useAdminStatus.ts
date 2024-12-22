@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-const fetchAdminStatus = async () => {
+export const fetchAdminStatus = async () => {
   const response = await fetch("/auth/adminCheck", {
     method: "GET",
-    credentials: "include", // Include cookies
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -21,7 +21,7 @@ const fetchAdminStatus = async () => {
 
 export const useAdminStatus = () => {
   return useQuery({
-    queryKey: ["adminCheck"],
+    queryKey: ["adminStatus"],
     queryFn: fetchAdminStatus,
     refetchOnMount: false,
   });
