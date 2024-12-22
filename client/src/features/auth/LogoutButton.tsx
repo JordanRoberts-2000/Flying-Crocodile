@@ -14,6 +14,7 @@ const logoutRequest = async () => {
 
 const LogoutButton = ({
   children,
+  ...rest
 }: PropsWithChildren & HTMLAttributes<HTMLButtonElement>) => {
   const queryClient = useQueryClient();
   const [isDisabled, setIsDisabled] = useState(false);
@@ -39,7 +40,7 @@ const LogoutButton = ({
   };
 
   return (
-    <button disabled={isDisabled} onClick={handleLogout}>
+    <button {...rest} disabled={isDisabled} onClick={handleLogout}>
       {children}
     </button>
   );

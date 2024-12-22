@@ -16,6 +16,7 @@ const customPlugin = plugin(({ addBase, theme, addVariant, addUtilities }) => {
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       borderRadius: {

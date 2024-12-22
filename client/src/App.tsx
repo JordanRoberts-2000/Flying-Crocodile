@@ -13,7 +13,7 @@ function App() {
     });
   }, []);
   return (
-    <div>
+    <div className="bg-blue-500 dark:bg-red-500 transition-colors">
       <header>
         <Sheet>
           <SheetTrigger asChild>
