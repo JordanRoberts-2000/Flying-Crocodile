@@ -33,14 +33,14 @@ impl From<Query> for GraphQLType {
 pub fn load_graphql(graphql_type: impl Into<GraphQLType>) -> String {
     let file_name = match graphql_type.into() {
         GraphQLType::Mutation(mutation) => match mutation {
-            Mutation::CreateEntry => "mutations/create_entry.graphql",
-            Mutation::DeleteEntry => "mutations/delete_entry.graphql",
-            Mutation::RenameEntry => "mutations/rename_entry.graphql",
-            Mutation::MoveEntry => "mutations/move_entry.graphql",
+            Mutation::CreateEntry => "raw/mutations/create_entry.graphql",
+            Mutation::DeleteEntry => "raw/mutations/delete_entry.graphql",
+            Mutation::RenameEntry => "raw/mutations/rename_entry.graphql",
+            Mutation::MoveEntry => "raw/mutations/move_entry.graphql",
         },
         GraphQLType::Query(query) => match query {
-            Query::GetRoots => "queries/get_roots.graphql",
-            Query::GetEntries => "queries/get_entries.graphql",
+            Query::GetRoots => "raw/queries/get_roots.graphql",
+            Query::GetEntries => "raw/queries/get_entries.graphql",
         },
     };
 
