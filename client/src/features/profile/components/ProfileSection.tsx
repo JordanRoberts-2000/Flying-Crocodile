@@ -4,8 +4,9 @@ import { useAdminStatus } from "@/features/auth/useAdminStatus";
 import LogoutButton from "@/features/auth/LogoutButton";
 
 const ProfileSection = ({}) => {
-  const { data: admin } = useAdminStatus();
+  const { data: admin, error } = useAdminStatus();
 
+  console.log(admin, error);
   const toggleDarkMode = () => {
     const root = document.documentElement;
     const isDarkMode = root.classList.contains("dark");
@@ -18,7 +19,7 @@ const ProfileSection = ({}) => {
       {admin ? (
         <div className="flex gap-4">
           <img
-            src={admin.avatar_url}
+            src={admin.avatarUrl!}
             className="bg-green-50 size-10 rounded-full shadow"
           ></img>
           <div>

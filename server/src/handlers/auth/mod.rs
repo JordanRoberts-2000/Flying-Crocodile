@@ -1,4 +1,3 @@
-pub mod admin_check;
 pub mod apple_auth;
 pub mod apple_callback;
 pub mod github_auth;

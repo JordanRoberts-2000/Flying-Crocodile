@@ -2,9 +2,9 @@ import { HTMLAttributes, PropsWithChildren, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const logoutRequest = async () => {
-  const response = await fetch("/auth/logout", {
+  const response = await fetch("api/auth/logout", {
     method: "POST",
-    credentials: "include", // Include cookies in the request
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -22,8 +22,7 @@ const LogoutButton = ({
   const { mutateAsync: logout } = useMutation({
     mutationFn: logoutRequest,
     onSuccess: () => {
-      // Invalidate or reset the admin status query
-      queryClient.invalidateQueries({ queryKey: ["adminCheck"] });
+      queryClient.invalidateQueries({ queryKey: ["adminStatus"] });
     },
   });
 

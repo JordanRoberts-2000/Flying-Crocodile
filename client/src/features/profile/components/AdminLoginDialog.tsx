@@ -25,7 +25,7 @@ const AdminLoginDialog = ({}) => {
         </p>
         <div className="flex gap-4 mt-4">
           <a
-            href="auth/github"
+            href="api/auth/github"
             className="flex-1 pr-10 border border-gray-300 flex gap-4 rounded-md shadow px-3 py-1 font-semibold"
           >
             <svg

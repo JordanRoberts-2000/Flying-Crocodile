@@ -55,6 +55,7 @@ pub fn create_server(app_state: Arc<AppState>) -> Server {
                 .allow_any_origin()
                 .allow_any_method()
                 .allow_any_header()
+                .supports_credentials()
         } else {
             Cors::default()
         };
@@ -66,8 +67,11 @@ pub fn create_server(app_state: Arc<AppState>) -> Server {
             .app_data(web::Data::new(schema.clone()))
             .app_data(web::Data::new(app_state.clone()))
             .route("/health", web::get().to(health_check))
-            .configure(graphql_routes)
-            .configure(auth_routes)
+            .service(
+                web::scope("/api")
+                    .configure(graphql_routes)
+                    .configure(auth_routes),
+            )
     })
     .bind(("0.0.0.0", port))
     .unwrap_or_else(|err| {

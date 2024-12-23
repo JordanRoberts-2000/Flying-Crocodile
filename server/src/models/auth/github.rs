@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -13,7 +14,7 @@ pub struct GitHubAccessTokenResponse {
     token_type: String,
 }
 
-#[derive(Deserialize, Clone, Debug, Serialize)]
+#[derive(Deserialize, Clone, Debug, Serialize, SimpleObject)]
 pub struct GitHubUser {
     pub login: String,
     pub name: Option<String>,

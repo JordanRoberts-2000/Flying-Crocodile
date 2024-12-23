@@ -14,10 +14,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/auth": {
+      "/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/auth/, "/auth"),
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },

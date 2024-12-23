@@ -22,6 +22,10 @@ impl AuthService {
             }
         }
 
+        let eee = req.cookie("session_id");
+
+        info!("Session cookie: {:?}", eee);
+
         info!("Session ID cookie not found");
         Ok(None)
     }
